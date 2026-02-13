@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
@@ -26,11 +26,7 @@ export default function PipelineBoard() {
   const [loading, setLoading] = useState(true);
   const [draggedItem, setDraggedItem] = useState(null);
 
-  useEffect(() => {
-    fetchProjects();
-  }, []);
-
-  const fetchProjects = async () => {
+  const fetchProjects = useCallback(async () => {
     try {
       const response = await axios.get(`${API_URL}/api/admin/projects`, {
         headers: getAuthHeaders()
@@ -42,7 +38,11 @@ export default function PipelineBoard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [getAuthHeaders]);
+
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
 
   const updateProjectStatus = async (projectId, newStatus) => {
     try {

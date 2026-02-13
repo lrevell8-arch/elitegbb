@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import axios from 'axios';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }) => {
     initAuth();
   }, []);
 
-  const login = async (email, password) => {
+  const login = useCallback(async (email, password) => {
     const response = await axios.post(`${API_URL}/api/auth/login`, {
       email,
       password
@@ -51,19 +51,19 @@ export const AuthProvider = ({ children }) => {
     setToken(newToken);
     setUser(userData);
     return userData;
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     localStorage.removeItem('hwh_token');
     setToken(null);
     setUser(null);
-  };
+  }, []);
 
-  const getAuthHeaders = () => ({
+  const getAuthHeaders = useCallback(() => ({
     Authorization: `Bearer ${token}`
-  });
+  }), [token]);
 
-  const value = {
+  const value = useMemo(() => ({
     user,
     token,
     loading,
@@ -71,7 +71,7 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     getAuthHeaders
-  };
+  }), [user, token, loading, login, logout, getAuthHeaders]);
 
   return (
     <AuthContext.Provider value={value}>
