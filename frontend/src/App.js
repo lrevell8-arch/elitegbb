@@ -13,6 +13,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import PipelineBoard from "./pages/PipelineBoard";
 import PlayerDirectory from "./pages/PlayerDirectory";
 import ProjectDetail from "./pages/ProjectDetail";
+import PlayerEvaluation from "./pages/PlayerEvaluation";
 import AdminCoaches from "./pages/AdminCoaches";
 
 // Coach Pages
@@ -100,6 +101,14 @@ function AppRoutes() {
         element={
           <AdminRoute>
             <ProjectDetail />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/projects/:projectId/evaluation"
+        element={
+          <AdminRoute>
+            <PlayerEvaluation />
           </AdminRoute>
         }
       />

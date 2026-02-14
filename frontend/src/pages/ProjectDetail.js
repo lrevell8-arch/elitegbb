@@ -10,7 +10,7 @@ import { Badge } from '../components/ui/badge';
 import { 
   ArrowLeft, Loader2, User, Calendar, MapPin, Check, 
   FileText, Download, Clock, Mail, ExternalLink, Copy,
-  CheckCircle, Circle, Pencil
+  CheckCircle, Circle, Pencil, ClipboardList
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
@@ -189,9 +189,18 @@ export default function ProjectDetail() {
           </div>
           
           <div className="flex items-center gap-3">
+            <Link to={`/admin/projects/${projectId}/evaluation`}>
+              <Button
+                variant="outline"
+                className="border-[#fb6c1d]/50 text-[#fb6c1d] hover:bg-[#fb6c1d]/10"
+              >
+                <ClipboardList className="w-4 h-4 mr-2" />
+                Evaluation Packet
+              </Button>
+            </Link>
             <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-              project.payment_status === 'paid' 
-                ? 'bg-green-500/20 text-green-400' 
+              project.payment_status === 'paid'
+                ? 'bg-green-500/20 text-green-400'
                 : 'bg-yellow-500/20 text-yellow-400'
             }`}>
               {project.payment_status === 'paid' ? 'Paid' : 'Payment Pending'}
@@ -555,6 +564,21 @@ export default function ProjectDetail() {
                           {r.reminder_type?.replace('_', ' ')}
                         </span>
                       </div>
+                      <span className="text-white/40 text-xs">
+                        {new Date(r.scheduled_date).toLocaleDateString()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+ </div>
                       <span className="text-white/40 text-xs">
                         {new Date(r.scheduled_date).toLocaleDateString()}
                       </span>
