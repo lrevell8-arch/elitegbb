@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": "hwh-player-advantage-main/frontend/build",
+    "public": "frontend/build",
     "ignore": [
       "firebase.json",
       "**/.*",
