@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
@@ -14,11 +14,7 @@ export default function PlayerEvaluation() {
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchProject();
-  }, [projectId]);
-
-  const fetchProject = async () => {
+  const fetchProject = useCallback(async () => {
     try {
       const response = await axios.get(`${API_URL}/api/admin/projects/${projectId}`, {
         headers: getAuthHeaders()
@@ -30,7 +26,11 @@ export default function PlayerEvaluation() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [projectId, getAuthHeaders]);
+
+  useEffect(() => {
+    fetchProject();
+  }, [fetchProject]);
 
   const handlePrint = () => {
     window.print();

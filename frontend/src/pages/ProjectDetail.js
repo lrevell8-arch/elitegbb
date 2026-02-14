@@ -578,18 +578,3 @@ export default function ProjectDetail() {
     </div>
   );
 }
- </div>
-                      <span className="text-white/40 text-xs">
-                        {new Date(r.scheduled_date).toLocaleDateString()}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </main>
-    </div>
-  );
-}
