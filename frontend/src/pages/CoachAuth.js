@@ -109,7 +109,12 @@ export default function CoachAuth() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="login-password">Password</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="login-password">Password</Label>
+                    <Link to="/forgot-password" className="text-[#fb6c1d] hover:underline text-xs">
+                      Forgot password?
+                    </Link>
+                  </div>
                   <Input
                     id="login-password"
                     data-testid="coach-login-password"

@@ -6,6 +6,8 @@ import { CoachAuthProvider, useCoachAuth } from "./context/CoachAuthContext";
 // Public Pages
 import IntakeForm from "./pages/IntakeForm";
 import SuccessPage from "./pages/SuccessPage";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 // Admin Pages
 import AdminLogin from "./pages/AdminLogin";
@@ -69,6 +71,8 @@ function AppRoutes() {
       <Route path="/" element={<Navigate to="/intake" replace />} />
       <Route path="/intake" element={<IntakeForm />} />
       <Route path="/success" element={<SuccessPage />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       
       {/* Admin Routes */}
       <Route path="/admin/login" element={<AdminLogin />} />

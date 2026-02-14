@@ -276,6 +276,113 @@ async def get_me(current_user: dict = Depends(get_current_user)):
     return user
 
 
+# ============ PASSWORD RESET ROUTES ============
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str = Field(..., min_length=8)
+
+
+@api_router.post("/auth/forgot-password")
+async def forgot_password(request: ForgotPasswordRequest, background_tasks: BackgroundTasks):
+    """Send password reset email to user."""
+    # Check both staff_users and coach_users collections
+    user = None
+    user_type = None
+    user_collection = None
+
+    # Try staff_users first
+    staff_user = await mongo_db.staff_users.find_one({"email": request.email})
+    if staff_user:
+        user = staff_user
+        user_type = "staff"
+        user_collection = "staff_users"
+    else:
+        # Try coach_users
+        coach_user = await mongo_db.coach_users.find_one({"email": request.email})
+        if coach_user:
+            user = coach_user
+            user_type = "coach"
+            user_collection = "coach_users"
+
+    if not user:
+        # Return success even if user not found (security best practice)
+        return {"message": "If an account exists with this email, a password reset link has been sent."}
+
+    # Generate reset token (valid for 1 hour)
+    reset_token = str(uuid.uuid4())
+    expires_at = (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
+
+    # Store reset token
+    reset_record = {
+        "id": str(uuid.uuid4()),
+        "token": reset_token,
+        "user_id": user["id"],
+        "user_type": user_type,
+        "user_collection": user_collection,
+        "email": request.email,
+        "expires_at": expires_at,
+        "used": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await mongo_db.password_reset_tokens.insert_one(reset_record)
+
+    # Generate reset URL
+    reset_url = f"{os.environ.get('FRONTEND_URL', 'https://app.elitegbb.com')}/reset-password?token={reset_token}"
+
+    # Send reset email
+    html_body, text_body = EmailTemplates.password_reset(
+        reset_url=reset_url,
+        user_name=user.get("name")
+    )
+    background_tasks.add_task(
+        send_email_with_logging,
+        to_email=request.email,
+        subject="Reset Your Password - Hoop With Her Player Advantage™",
+        html_body=html_body,
+        text_body=text_body,
+        email_type="password_reset"
+    )
+
+    return {"message": "If an account exists with this email, a password reset link has been sent."}
+
+
+@api_router.post("/auth/reset-password")
+async def reset_password(request: ResetPasswordRequest):
+    """Reset user password using valid token."""
+    # Find valid token
+    reset_record = await mongo_db.password_reset_tokens.find_one({
+        "token": request.token,
+        "used": False,
+        "expires_at": {"$gt": datetime.now(timezone.utc).isoformat()}
+    })
+
+    if not reset_record:
+        raise HTTPException(status_code=400, detail="Invalid or expired reset token")
+
+    # Hash new password
+    new_password_hash = hash_password(request.new_password)
+
+    # Update user's password
+    collection_name = reset_record["user_collection"]
+    await mongo_db[collection_name].update_one(
+        {"id": reset_record["user_id"]},
+        {"$set": {"password_hash": new_password_hash, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+
+    # Mark token as used
+    await mongo_db.password_reset_tokens.update_one(
+        {"id": reset_record["id"]},
+        {"$set": {"used": True, "used_at": datetime.now(timezone.utc).isoformat()}}
+    )
+
+    return {"message": "Password has been reset successfully. You can now log in with your new password."}
+
+
 # ============ INTAKE ROUTES ============
 
 def generate_player_key(name: str, grad_class: str, dob: Optional[str]) -> str:
