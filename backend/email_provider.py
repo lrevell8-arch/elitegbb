@@ -399,7 +399,7 @@ Log in to respond to this message.
                     <p style="margin: 5px 0 0; color: {EmailTemplates.BRAND_ORANGE}; font-weight: bold;">{player_name}</p>
                 </div>
             """
-        
+
         content = f"""
             <h2 style="margin: 0 0 20px; color: white; font-size: 24px;">
                 Message from {sender_name}
@@ -420,7 +420,7 @@ Log in to respond to this message.
                 Log in to the Coach Portal to respond.
             </p>
         """
-        
+
         html = EmailTemplates.base_template(content, f"Message from {sender_name}")
         text = f"""
 Message from {sender_name}
@@ -435,7 +435,66 @@ Log in to the Coach Portal to respond.
 
 © {datetime.now().year} Hoop With Her. All rights reserved.
         """
-        
+
+        return html, text
+
+    @staticmethod
+    def password_reset(reset_url: str, user_name: Optional[str] = None) -> tuple:
+        """Email template for password reset."""
+        greeting = f"Hi {user_name}," if user_name else "Hi there,"
+
+        content = f"""
+            <h2 style="margin: 0 0 20px; color: white; font-size: 24px;">
+                Reset Your Password
+            </h2>
+            <p style="margin: 0 0 20px; color: rgba(255,255,255,0.8); font-size: 16px; line-height: 1.6;">
+                {greeting}
+            </p>
+            <p style="margin: 0 0 20px; color: rgba(255,255,255,0.8); font-size: 16px; line-height: 1.6;">
+                We received a request to reset your password for your Hoop With Her Player Advantage™ account.
+                Click the button below to set a new password:
+            </p>
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{reset_url}" style="background: linear-gradient(to right, {EmailTemplates.BRAND_BLUE}, {EmailTemplates.BRAND_ORANGE}); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">
+                    Reset Password
+                </a>
+            </div>
+            <p style="margin: 20px 0; color: rgba(255,255,255,0.6); font-size: 14px;">
+                Or copy and paste this link into your browser:
+            </p>
+            <p style="margin: 0 0 20px; color: rgba(255,255,255,0.4); font-size: 12px; word-break: break-all;">
+                {reset_url}
+            </p>
+            <div style="background-color: rgba(255,255,255,0.05); border-radius: 12px; padding: 20px; margin: 20px 0;">
+                <p style="margin: 0; color: rgba(255,255,255,0.6); font-size: 14px;">
+                    <strong style="color: rgba(255,255,255,0.8);">Didn't request this?</strong><br>
+                    If you didn't request a password reset, you can safely ignore this email. Your password will remain unchanged.
+                </p>
+            </div>
+            <p style="margin: 30px 0 0; color: rgba(255,255,255,0.6); font-size: 14px;">
+                This link will expire in 1 hour for security reasons.
+            </p>
+        """
+
+        html = EmailTemplates.base_template(content, "Reset Your Password - Hoop With Her")
+        text = f"""
+Reset Your Password
+
+{greeting}
+
+We received a request to reset your password for your Hoop With Her Player Advantage™ account.
+
+Click the link below to set a new password:
+{reset_url}
+
+Didn't request this?
+If you didn't request a password reset, you can safely ignore this email. Your password will remain unchanged.
+
+This link will expire in 1 hour for security reasons.
+
+© {datetime.now().year} Hoop With Her. All rights reserved.
+        """
+
         return html, text
 
 
