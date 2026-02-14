@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
@@ -17,11 +17,7 @@ export default function AdminCoaches() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all'); // all, pending, verified
 
-  useEffect(() => {
-    fetchCoaches();
-  }, [filter]);
-
-  const fetchCoaches = async () => {
+  const fetchCoaches = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
@@ -38,7 +34,11 @@ export default function AdminCoaches() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter, getAuthHeaders]);
+
+  useEffect(() => {
+    fetchCoaches();
+  }, [fetchCoaches]);
 
   const toggleVerification = async (coachId) => {
     try {
