@@ -54,7 +54,7 @@ export default function Landing() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#030712]">
+    <div className="min-h-screen bg-[#0b0b0b]">
       <div className="fixed inset-0 grid-overlay pointer-events-none" />
       <div className="fixed top-0 left-1/4 w-[600px] h-[600px] bg-[#0134bd]/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="fixed bottom-0 right-1/4 w-[500px] h-[500px] bg-[#fb6c1d]/5 rounded-full blur-[100px] pointer-events-none" />
@@ -65,7 +65,7 @@ export default function Landing() {
             <Link to="/" className="flex items-center gap-3 group">
               <div className="relative w-11 h-11">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#0134bd] to-[#fb6c1d] rounded-xl rotate-6 group-hover:rotate-12 transition-transform duration-300" />
-                <div className="absolute inset-0 bg-[#030712] rounded-xl flex items-center justify-center">
+                <div className="absolute inset-0 bg-[#0b0b0b] rounded-xl flex items-center justify-center">
                   <span className="text-xl font-black text-elite-gradient">E</span>
                 </div>
               </div>
@@ -155,7 +155,7 @@ export default function Landing() {
           </div>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#030712] to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#0b0b0b] to-transparent" />
       </section>
 
       <section className="py-16 border-y border-white/[0.04] bg-black/20">
@@ -507,7 +507,7 @@ export default function Landing() {
               <Link to="/" className="flex items-center gap-3 mb-6">
                 <div className="relative w-10 h-10">
                   <div className="absolute inset-0 bg-gradient-to-br from-[#0134bd] to-[#fb6c1d] rounded-lg rotate-6" />
-                  <div className="absolute inset-0 bg-[#030712] rounded-lg flex items-center justify-center">
+                  <div className="absolute inset-0 bg-[#0b0b0b] rounded-lg flex items-center justify-center">
                     <span className="text-lg font-black text-elite-gradient">E</span>
                   </div>
                 </div>
