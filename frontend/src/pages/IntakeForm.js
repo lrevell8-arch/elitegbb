@@ -185,7 +185,7 @@ export default function IntakeForm() {
         signature_date: new Date().toISOString(),
       };
 
-      const response = await axios.post(`${API_URL}/api/intake`, submitData);
+      const response = await axios.post(`${API_URL}/api/players`, submitData);
       
       if (response.data.payment_url) {
         // Redirect to Stripe checkout

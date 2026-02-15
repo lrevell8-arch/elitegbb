@@ -30,10 +30,6 @@ export default function PlayerDirectory() {
     verified: ''
   });
 
-  useEffect(() => {
-    fetchPlayers();
-  }, [fetchPlayers]);
-
   const fetchPlayers = useCallback(async () => {
     setLoading(true);
     try {
@@ -58,6 +54,10 @@ export default function PlayerDirectory() {
       setLoading(false);
     }
   }, [page, filters, getAuthHeaders]);
+
+  useEffect(() => {
+    fetchPlayers();
+  }, [fetchPlayers]);
 
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value }));
