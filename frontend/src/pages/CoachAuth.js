@@ -6,7 +6,8 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { Loader2, GraduationCap, UserPlus, LogIn } from 'lucide-react';
+import Navigation from '../components/Navigation';
+import { Loader2, GraduationCap, UserPlus, LogIn, Home, User } from 'lucide-react';
 
 export default function CoachAuth() {
   const navigate = useNavigate();
@@ -68,8 +69,12 @@ export default function CoachAuth() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b0b0b] flex items-center justify-center p-4">
-      <div className="max-w-md w-full">
+    <div className="min-h-screen bg-[#0b0b0b]">
+      {/* Navigation */}
+      <Navigation variant="minimal" />
+
+      <div className="pt-24 pb-12 px-4 flex items-center justify-center min-h-screen">
+        <div className="max-w-md w-full">
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 rounded-full bg-gradient-to-r from-[#0134bd] to-[#fb6c1d] flex items-center justify-center mx-auto mb-4">

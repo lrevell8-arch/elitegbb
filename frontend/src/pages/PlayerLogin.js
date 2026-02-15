@@ -6,6 +6,7 @@ import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Label } from '../components/ui/label';
+import Navigation from '../components/Navigation';
 import { Loader2, User } from 'lucide-react';
 
 export default function PlayerLogin() {
@@ -32,8 +33,12 @@ export default function PlayerLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b0b0b] flex items-center justify-center p-4">
-      <Card className="w-full max-w-md bg-[#121212] border-white/10">
+    <div className="min-h-screen bg-[#0b0b0b]">
+      {/* Navigation */}
+      <Navigation variant="minimal" />
+
+      <div className="pt-24 pb-12 px-4 flex items-center justify-center min-h-screen">
+        <Card className="w-full max-w-md bg-[#121212] border-white/10">
         <CardHeader className="text-center">
           <div className="mx-auto w-12 h-12 bg-[#8f33e6] rounded-full flex items-center justify-center mb-4">
             <User className="w-6 h-6 text-white" />
@@ -101,6 +106,7 @@ export default function PlayerLogin() {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

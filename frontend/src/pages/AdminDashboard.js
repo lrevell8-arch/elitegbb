@@ -4,10 +4,11 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
 import { Button } from '../components/ui/button';
+import Navigation from '../components/Navigation';
 import { 
   Users, ClipboardList, LayoutGrid, Settings, LogOut, 
   TrendingUp, Clock, Package, ChevronRight, Loader2,
-  Download, FileSpreadsheet
+  Download, FileSpreadsheet, Home, GraduationCap, User
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
@@ -97,100 +98,15 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-[#0b0b0b]">
-      {/* Sidebar */}
-      <aside className="fixed left-0 top-0 h-full w-64 bg-[#121212] border-r border-white/10 z-50 hidden lg:block">
-        <div className="p-6">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#0134bd] to-[#fb6c1d] flex items-center justify-center">
-              <span className="font-heading font-black text-white text-sm">HWH</span>
-            </div>
-            <div>
-              <div className="font-heading font-bold text-white uppercase tracking-wide text-sm">Admin</div>
-              <div className="text-xs text-white/50">Player Advantage™</div>
-            </div>
-          </div>
-
-          <nav className="space-y-2">
-            <Link
-              to="/admin"
-              className="flex items-center gap-3 px-4 py-3 rounded-lg bg-[#0134bd]/10 text-[#0134bd] border border-[#0134bd]/20"
-            >
-              <LayoutGrid className="w-5 h-5" />
-              <span className="font-medium">Dashboard</span>
-            </Link>
-            <Link
-              to="/admin/pipeline"
-              data-testid="nav-pipeline"
-              className="flex items-center gap-3 px-4 py-3 rounded-lg text-white/70 hover:bg-white/5 transition-colors"
-            >
-              <ClipboardList className="w-5 h-5" />
-              <span className="font-medium">Pipeline</span>
-            </Link>
-            <Link
-              to="/admin/players"
-              data-testid="nav-players"
-              className="flex items-center gap-3 px-4 py-3 rounded-lg text-white/70 hover:bg-white/5 transition-colors"
-            >
-              <Users className="w-5 h-5" />
-              <span className="font-medium">Players</span>
-            </Link>
-            <Link
-              to="/admin/coaches"
-              data-testid="nav-coaches"
-              className="flex items-center gap-3 px-4 py-3 rounded-lg text-white/70 hover:bg-white/5 transition-colors"
-            >
-              <Settings className="w-5 h-5" />
-              <span className="font-medium">Coaches</span>
-            </Link>
-          </nav>
-        </div>
-
-        <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-white/10">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
-              <span className="text-white font-medium">{user?.name?.[0] || 'A'}</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-white text-sm font-medium truncate">{user?.name || 'Admin'}</div>
-              <div className="text-white/50 text-xs truncate">{user?.email}</div>
-            </div>
-          </div>
-          <Button
-            onClick={handleLogout}
-            data-testid="logout-btn"
-            variant="ghost"
-            className="w-full justify-start text-white/50 hover:text-white hover:bg-white/5"
-          >
-            <LogOut className="w-4 h-4 mr-2" />
-            Sign Out
-          </Button>
-        </div>
-      </aside>
+      {/* Navigation */}
+      <Navigation 
+        variant="admin" 
+        user={user} 
+        onLogout={handleLogout}
+      />
 
       {/* Main Content */}
       <main className="lg:ml-64 min-h-screen">
-        {/* Mobile Header */}
-        <header className="lg:hidden sticky top-0 z-40 bg-[#121212]/80 backdrop-blur-md border-b border-white/10">
-          <div className="flex items-center justify-between p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#0134bd] to-[#fb6c1d] flex items-center justify-center">
-                <span className="font-heading font-black text-white text-sm">HWH</span>
-              </div>
-              <span className="font-heading font-bold text-white">Admin</span>
-            </div>
-            <div className="flex gap-2">
-              <Link to="/admin/pipeline">
-                <Button size="sm" variant="ghost"><ClipboardList className="w-4 h-4" /></Button>
-              </Link>
-              <Link to="/admin/players">
-                <Button size="sm" variant="ghost"><Users className="w-4 h-4" /></Button>
-              </Link>
-              <Button size="sm" variant="ghost" onClick={handleLogout}>
-                <LogOut className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-        </header>
 
         <div className="p-6 lg:p-8">
           {/* Page Header */}
