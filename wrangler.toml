@@ -8,13 +8,30 @@ pages_build_output_dir = "frontend/build"
 # Cloudflare Pages configuration
 # Build command uses only frontend dependencies (Functions use native fetch)
 
+# ============================================================================
+# CRITICAL: Use the CORRECT Supabase Project
+# ============================================================================
+# You have TWO Supabase projects:
+#   1. "hoopwithherbasketball-lab's Project" ← USE THIS ONE (more robust)
+#   2. "HWH Player Advantage" ← DO NOT USE (incomplete schema)
+#
+# Get credentials from: https://supabase.com/dashboard/project/[PROJECT_ID]/settings/api
+# Look for Project URL and anon/public key
+# ============================================================================
+
 # Environment variables (set these in Cloudflare Dashboard > Pages > Settings > Environment Variables)
 [vars]
 # These are placeholder values - set real values in Cloudflare Dashboard
-JWT_SECRET = "your-super-secret-jwt-key-change-this-in-production"
+JWT_SECRET = "your-super-secret-jwt-key-change-in-production"
 
 [env.production.vars]
-JWT_SECRET = "your-super-secret-jwt-key-change-this-in-production"
+JWT_SECRET = "your-super-secret-jwt-key-change-in-production"
 
-# Note: SUPABASE_URL, SUPABASE_ANON_KEY, and JWT_SECRET must be set
-# in the Cloudflare Dashboard under Pages > Settings > Environment Variables
+# Required Environment Variables (set in Cloudflare Dashboard):
+# SUPABASE_URL = "https://[PROJECT_ID].supabase.co"  # From hoopwithherbasketball-lab's Project
+# SUPABASE_ANON_KEY = "eyJ..."  # anon/public key from same project
+# JWT_SECRET = "secure-random-string-min-32-chars"
+# STRIPE_API_KEY = "sk_live_..."  # optional, for payments
+
+# To verify you're using the correct database, run this SQL in the SQL Editor:
+# SELECT current_database(), current_user, version();
