@@ -3,5 +3,12 @@
   "include": [
     "/api/*"
   ],
-  "exclude": []
+  "exclude": [],
+  "routes": [
+    {
+      "pattern": "/api/admin/coaches/*/verify",
+      "method": "PATCH",
+      "function": "/api/admin/coaches/[coachId]/verify"
+    }
+  ]
 }
