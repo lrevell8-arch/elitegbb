@@ -1,5 +1,7 @@
 // Catch-all API Handler for Cloudflare Pages Functions
 // Routes requests to specific handlers based on path
+// Note: Most routes are now handled by dedicated files using file-based routing
+// This file serves as a fallback and handles auth routes
 
 // Import specific handlers
 import * as loginHandler from './auth/login.js';
@@ -48,16 +50,44 @@ export async function onRequest(context) {
     return healthHandler.onRequestOptions();
   }
   
-  // Default 404 response
+  // For all other paths, return info about available endpoints
   return new Response(
     JSON.stringify({ 
-      detail: 'Endpoint not implemented in Cloudflare Function',
-      path: fullPath,
-      method: method,
-      note: 'Some endpoints require the full Python backend. This is a lightweight JS implementation for critical auth routes.'
+      status: 'API is running',
+      available_endpoints: {
+        auth: [
+          'POST /api/auth/login - Admin/Staff login',
+          'POST /api/auth/setup - Create initial admin user',
+          'GET /api/auth/me - Get current user info'
+        ],
+        admin: [
+          'GET /api/admin/dashboard - Admin dashboard stats',
+          'GET /api/admin/pipeline - Pipeline board data',
+          'GET /api/admin/players - Player directory',
+          'GET /api/admin/coaches - Coach management'
+        ],
+        coach: [
+          'POST /api/coach/login - Coach login',
+          'GET /api/coach/dashboard - Coach dashboard',
+          'GET /api/coach/subscription - Subscription info',
+          'GET /api/coach/messages - Messages',
+          'GET /api/coach/compare?ids=id1,id2 - Compare players'
+        ],
+        data: [
+          'GET /api/players - List players',
+          'POST /api/players - Create player (intake)',
+          'GET /api/coaches - List coaches',
+          'GET /api/projects - List projects (pipeline)',
+          'GET /api/messages - List messages'
+        ],
+        system: [
+          'GET /api/health - Health check'
+        ]
+      },
+      note: 'File-based routing is active. Most endpoints are handled by dedicated files in /functions/api/'
     }),
     { 
-      status: 404, 
+      status: 200, 
       headers: { 
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*'
