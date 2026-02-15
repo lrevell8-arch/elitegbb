@@ -93,8 +93,8 @@ CREATE TABLE IF NOT EXISTS players (
     jersey_number TEXT,
     height TEXT,
     weight TEXT,
-    parent_name TEXT NOT NULL,
-    parent_email TEXT NOT NULL,
+    parent_name TEXT,
+    parent_email TEXT,
     parent_phone TEXT,
     player_email TEXT,
     level TEXT,
@@ -123,10 +123,10 @@ CREATE TABLE IF NOT EXISTS players (
     other_socials TEXT,
     goal TEXT,
     colleges_interest TEXT,
-    package_selected TEXT NOT NULL,
+    package_selected TEXT,
     consent_eval BOOLEAN DEFAULT FALSE,
     consent_media BOOLEAN DEFAULT FALSE,
-    guardian_signature TEXT NOT NULL,
+    guardian_signature TEXT,
     signature_date DATE,
     payment_status TEXT DEFAULT 'pending' CHECK (payment_status IN ('pending', 'paid', 'failed')),
     stripe_session_id TEXT,
@@ -198,7 +198,7 @@ CREATE POLICY "Allow projects access to staff" ON projects
 CREATE TABLE IF NOT EXISTS deliverables (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     project_id UUID REFERENCES projects(id) ON DELETE CASCADE,
-    type TEXT NOT NULL CHECK (type IN ('written_evaluation', 'film_breakdown', 'social_clip', 'prospect_analysis')),
+    type TEXT NOT NULL CHECK (type IN ('written_evaluation', 'film_breakdown', 'social_clip', 'prospect_analysis', 'one_pager', 'verified_badge', 'tracking_profile', 'film_index', 'referral_note', 'mid_season_update', 'end_season_update')),
     status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'in_progress', 'ready_for_review', 'approved', 'delivered')),
     file_url TEXT,
     notes TEXT,
@@ -283,7 +283,92 @@ CREATE POLICY "Allow payment access to staff" ON payment_transactions
     );
 
 -- ============================================================================
--- 8. COACH MESSAGES TABLE
+-- 8. INTAKE SUBMISSIONS TABLE (Detailed intake form data)
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS intake_submissions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    player_id UUID REFERENCES players(id) ON DELETE CASCADE,
+    parent_name TEXT NOT NULL,
+    parent_email TEXT NOT NULL,
+    parent_phone TEXT,
+    player_email TEXT,
+    level TEXT,
+    team_names TEXT,
+    league_region TEXT,
+    games_played INTEGER,
+    ppg DECIMAL(5,2),
+    apg DECIMAL(5,2),
+    rpg DECIMAL(5,2),
+    spg DECIMAL(5,2),
+    bpg DECIMAL(5,2),
+    fg_pct DECIMAL(5,2),
+    three_pct DECIMAL(5,2),
+    ft_pct DECIMAL(5,2),
+    self_words TEXT,
+    strength TEXT,
+    improvement TEXT,
+    separation TEXT,
+    adversity_response TEXT,
+    iq_self_rating TEXT,
+    pride_tags TEXT[],
+    player_model TEXT,
+    film_links TEXT[],
+    highlight_links TEXT[],
+    instagram_handle TEXT,
+    other_socials TEXT,
+    goal TEXT,
+    colleges_interest TEXT,
+    package_selected TEXT,
+    consent_eval BOOLEAN DEFAULT FALSE,
+    consent_media BOOLEAN DEFAULT FALSE,
+    guardian_signature TEXT,
+    signature_date DATE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create indexes
+CREATE INDEX IF NOT EXISTS idx_intake_player_id ON intake_submissions(player_id);
+CREATE INDEX IF NOT EXISTS idx_intake_created_at ON intake_submissions(created_at);
+
+-- Row Level Security
+ALTER TABLE intake_submissions ENABLE ROW LEVEL SECURITY;
+
+-- Allow read access to staff
+CREATE POLICY "Allow intake submissions access to staff" ON intake_submissions
+    FOR ALL USING (
+        EXISTS (SELECT 1 FROM staff_users WHERE id::text = auth.uid()::text)
+    );
+
+-- ============================================================================
+-- 9. REMINDERS TABLE (Follow-up reminders for projects)
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS reminders (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    project_id UUID REFERENCES projects(id) ON DELETE CASCADE,
+    reminder_type TEXT NOT NULL CHECK (reminder_type IN ('mid_season_update', 'coach_followup', 'payment_reminder')),
+    scheduled_date TIMESTAMP WITH TIME ZONE NOT NULL,
+    sent BOOLEAN DEFAULT FALSE,
+    sent_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create indexes
+CREATE INDEX IF NOT EXISTS idx_reminders_project_id ON reminders(project_id);
+CREATE INDEX IF NOT EXISTS idx_reminders_scheduled ON reminders(scheduled_date, sent);
+CREATE INDEX IF NOT EXISTS idx_reminders_type ON reminders(reminder_type);
+
+-- Row Level Security
+ALTER TABLE reminders ENABLE ROW LEVEL SECURITY;
+
+-- Allow access to staff
+CREATE POLICY "Allow reminders access to staff" ON reminders
+    FOR ALL USING (
+        EXISTS (SELECT 1 FROM staff_users WHERE id::text = auth.uid()::text)
+    );
+
+-- ============================================================================
+-- 10. COACH MESSAGES TABLE
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS coach_messages (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -375,6 +460,9 @@ CREATE TRIGGER update_deliverables_updated_at BEFORE UPDATE ON deliverables
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_payment_transactions_updated_at BEFORE UPDATE ON payment_transactions
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_intake_submissions_updated_at BEFORE UPDATE ON intake_submissions
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- ============================================================================
