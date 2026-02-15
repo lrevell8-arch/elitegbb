@@ -18,7 +18,7 @@ EMAIL_PROVIDER = os.environ.get('EMAIL_PROVIDER', 'mock')  # mock | ses
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
 AWS_REGION = os.environ.get('AWS_REGION', 'us-east-1')
-SES_FROM_ADDRESS = os.environ.get('SES_FROM_ADDRESS', 'noreply@hoopwithher.com')
+SES_FROM_ADDRESS = os.environ.get('SES_FROM_EMAIL', 'noreply@elitegbb.com')
 
 
 class EmailProvider(ABC):
