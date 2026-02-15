@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "include": [
+    "/api/*"
+  ],
+  "exclude": [],
+  "routes": [
+    {
+      "pattern": "/api/admin/coaches/*/verify",
+      "method": "PATCH",
+      "function": "/api/admin/coaches/[coachId]/verify"
+    }
+  ]
+}

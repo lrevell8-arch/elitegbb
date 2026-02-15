@@ -8,6 +8,7 @@ import { Label } from '../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Checkbox } from '../components/ui/checkbox';
 import { Textarea } from '../components/ui/textarea';
+import Navigation from '../components/Navigation';
 import { ChevronLeft, ChevronRight, Check, Loader2 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
@@ -185,7 +186,7 @@ export default function IntakeForm() {
         signature_date: new Date().toISOString(),
       };
 
-      const response = await axios.post(`${API_URL}/api/intake`, submitData);
+      const response = await axios.post(`${API_URL}/api/players`, submitData);
       
       if (response.data.payment_url) {
         // Redirect to Stripe checkout
@@ -904,23 +905,11 @@ export default function IntakeForm() {
 
   return (
     <div className="min-h-screen bg-[#0b0b0b]">
-      {/* Header */}
-      <header className="border-b border-white/10 bg-[#121212]/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#0134bd] to-[#fb6c1d] flex items-center justify-center">
-              <span className="font-heading font-black text-white text-sm">HWH</span>
-            </div>
-            <div>
-              <div className="font-heading font-bold text-white uppercase tracking-wide">Player Advantage™</div>
-              <div className="text-xs text-white/50">Hoop With Her</div>
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Navigation */}
+      <Navigation variant="minimal" />
 
       {/* Step Progress */}
-      <div className="border-b border-white/10 bg-[#0b0b0b] sticky top-[73px] z-40">
+      <div className="border-b border-white/10 bg-[#0b0b0b] sticky top-[65px] z-40">
         <div className="max-w-5xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between gap-2 overflow-x-auto pb-2">
             {STEPS.map((step, index) => (

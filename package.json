@@ -1,0 +1,8 @@
+{
+  "name": "elitegbb-app",
+  "version": "1.0.0",
+  "description": "EliteGBB - Basketball Recruitment Platform",
+  "scripts": {
+    "build": "cd frontend && npm ci --legacy-peer-deps && DISABLE_ESLINT_PLUGIN=true npm run build"
+  }
+}
