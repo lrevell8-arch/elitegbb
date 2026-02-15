@@ -3,15 +3,5 @@
   "include": [
     "/api/*"
   ],
-  "exclude": [],
-  "routes": [
-    { "path": "/api/health", "methods": ["GET", "OPTIONS"] },
-    { "path": "/api/auth/*", "methods": ["GET", "POST", "PATCH", "DELETE", "OPTIONS"] },
-    { "path": "/api/admin/*", "methods": ["GET", "POST", "PATCH", "DELETE", "OPTIONS"] },
-    { "path": "/api/coach/*", "methods": ["GET", "POST", "PATCH", "DELETE", "OPTIONS"] },
-    { "path": "/api/coaches/*", "methods": ["GET", "POST", "PATCH", "DELETE", "OPTIONS"] },
-    { "path": "/api/players/*", "methods": ["GET", "POST", "PATCH", "DELETE", "OPTIONS"] },
-    { "path": "/api/projects/*", "methods": ["GET", "POST", "PATCH", "DELETE", "OPTIONS"] },
-    { "path": "/api/messages/*", "methods": ["GET", "POST", "PATCH", "DELETE", "OPTIONS"] }
-  ]
+  "exclude": []
 }
