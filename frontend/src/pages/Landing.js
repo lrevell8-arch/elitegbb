@@ -83,6 +83,9 @@ export default function Landing() {
             </div>
 
             <div className="flex items-center gap-3">
+              <Link to="/player/login" className="hidden sm:block px-5 py-2.5 text-sm font-medium text-gray-300 hover:text-white transition-colors">
+                Player Portal
+              </Link>
               <Link to="/coach/login" className="hidden sm:block px-5 py-2.5 text-sm font-medium text-gray-300 hover:text-white transition-colors">
                 Coach Portal
               </Link>

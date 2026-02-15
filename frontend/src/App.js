@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "sonner";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { CoachAuthProvider, useCoachAuth } from "./context/CoachAuthContext";
+import { PlayerAuthProvider, usePlayerAuth } from "./context/PlayerAuthContext";
 
 // Public Pages
 import Landing from "./pages/Landing";
@@ -26,6 +27,10 @@ import CoachProspectDetail from "./pages/CoachProspectDetail";
 import CoachSubscription from "./pages/CoachSubscription";
 import CoachMessages from "./pages/CoachMessages";
 import CoachCompare from "./pages/CoachCompare";
+
+// Player Pages
+import PlayerLogin from "./pages/PlayerLogin";
+import PlayerPortal from "./pages/PlayerPortal";
 
 // Protected Route for Admin
 const AdminRoute = ({ children }) => {
@@ -60,6 +65,25 @@ const CoachRoute = ({ children }) => {
   
   if (!isAuthenticated) {
     return <Navigate to="/coach/login" replace />;
+  }
+  
+  return children;
+};
+
+// Protected Route for Player
+const PlayerRoute = ({ children }) => {
+  const { isAuthenticated, loading } = usePlayerAuth();
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0b0b0b] flex items-center justify-center">
+        <div className="animate-pulse text-white">Loading...</div>
+      </div>
+    );
+  }
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/player/login" replace />;
   }
   
   return children;
@@ -176,6 +200,17 @@ function AppRoutes() {
           </CoachRoute>
         }
       />
+
+      {/* Player Routes */}
+      <Route path="/player/login" element={<PlayerLogin />} />
+      <Route
+        path="/player"
+        element={
+          <PlayerRoute>
+            <PlayerPortal />
+          </PlayerRoute>
+        }
+      />
     </Routes>
   );
 }
@@ -185,17 +220,19 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <CoachAuthProvider>
-          <AppRoutes />
-          <Toaster 
-            position="top-right"
-            toastOptions={{
-              style: {
-                background: '#121212',
-                color: '#fff',
-                border: '1px solid rgba(255,255,255,0.1)',
-              },
-            }}
-          />
+          <PlayerAuthProvider>
+            <AppRoutes />
+            <Toaster
+              position="top-right"
+              toastOptions={{
+                style: {
+                  background: '#121212',
+                  color: '#fff',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                },
+              }}
+            />
+          </PlayerAuthProvider>
         </CoachAuthProvider>
       </AuthProvider>
     </BrowserRouter>
