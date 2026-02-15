@@ -1,5 +1,17 @@
 name = "elitegbb-app"
 compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
 
 # Cloudflare Pages configuration
 pages_build_output_dir = "frontend/build"
+
+# Environment variables (set these in Cloudflare Dashboard > Pages > Settings > Environment Variables)
+[vars]
+# These are placeholder values - set real values in Cloudflare Dashboard
+JWT_SECRET = "your-super-secret-jwt-key-change-this-in-production"
+
+[[env.production.vars]]
+JWT_SECRET = "your-super-secret-jwt-key-change-this-in-production"
+
+# Note: SUPABASE_URL, SUPABASE_ANON_KEY, and JWT_SECRET must be set
+# in the Cloudflare Dashboard under Pages > Settings > Environment Variables
