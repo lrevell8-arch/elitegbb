@@ -7,7 +7,7 @@ pages_build_output_dir = "frontend/build"
 
 # Build command - installs function dependencies then builds frontend
 [build]
-command = "npm ci && cd frontend && npm ci --legacy-peer-deps && DISABLE_ESLINT_PLUGIN=true npm run build"
+command = "npm install && cd frontend && npm ci --legacy-peer-deps && DISABLE_ESLINT_PLUGIN=true npm run build"
 
 # Environment variables (set these in Cloudflare Dashboard > Pages > Settings > Environment Variables)
 [vars]

@@ -4,7 +4,7 @@
   "description": "EliteGBB - Basketball Recruitment Platform",
   "scripts": {
     "build": "cd frontend && npm ci --legacy-peer-deps && DISABLE_ESLINT_PLUGIN=true npm run build",
-    "build:functions": "cd functions && npm ci",
+    "build:functions": "cd functions && npm install",
     "postinstall": "npm run build:functions"
   },
   "dependencies": {
