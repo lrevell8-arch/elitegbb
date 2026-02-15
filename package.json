@@ -3,12 +3,6 @@
   "version": "1.0.0",
   "description": "EliteGBB - Basketball Recruitment Platform",
   "scripts": {
-    "build": "cd frontend && npm ci --legacy-peer-deps && DISABLE_ESLINT_PLUGIN=true npm run build",
-    "build:functions": "cd functions && npm install",
-    "postinstall": "npm run build:functions"
-  },
-  "dependencies": {
-    "@supabase/supabase-js": "^2.39.0",
-    "bcryptjs": "^2.4.3"
+    "build": "cd frontend && npm ci --legacy-peer-deps && DISABLE_ESLINT_PLUGIN=true npm run build"
   }
 }

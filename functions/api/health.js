@@ -1,30 +1,50 @@
-// Health Check Endpoint
+// Health Check Endpoint - Native Fetch Version (No Dependencies)
 // GET /api/health
-
-import { createClient } from '@supabase/supabase-js';
 
 export async function onRequestGet(context) {
   const { env } = context;
-  
+
   try {
-    // Initialize Supabase client
-    const supabase = createClient(
-      env.SUPABASE_URL,
-      env.SUPABASE_ANON_KEY
-    );
-    
+    if (!env.SUPABASE_URL || !env.SUPABASE_ANON_KEY) {
+      return new Response(
+        JSON.stringify({
+          status: 'error',
+          timestamp: new Date().toISOString(),
+          error: 'Missing Supabase configuration'
+        }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Test database connection by counting users
-    const { count: staffCount, error: staffError } = await supabase
-      .from('staff_users')
-      .select('*', { count: 'exact', head: true });
-    
-    const { count: coachCount, error: coachError } = await supabase
-      .from('coaches')
-      .select('*', { count: 'exact', head: true });
-    
-    const dbStatus = (staffError || coachError) ? 'error' : 'connected';
-    const dbError = staffError?.message || coachError?.message;
-    
+    const baseUrl = `${env.SUPABASE_URL}/rest/v1`;
+    const headers = {
+      'apikey': env.SUPABASE_ANON_KEY,
+      'Authorization': `Bearer ${env.SUPABASE_ANON_KEY}`,
+      'Prefer': 'count=exact'
+    };
+
+    // Check staff_users
+    const staffResponse = await fetch(`${baseUrl}/staff_users?select=id&limit=1`, {
+      method: 'HEAD',
+      headers
+    });
+
+    const staffRange = staffResponse.headers.get('Content-Range');
+    const staffCount = staffRange ? parseInt(staffRange.split('/')[1]) : 0;
+
+    // Check coaches
+    const coachResponse = await fetch(`${baseUrl}/coaches?select=id&limit=1`, {
+      method: 'HEAD',
+      headers
+    });
+
+    const coachRange = coachResponse.headers.get('Content-Range');
+    const coachCount = coachRange ? parseInt(coachRange.split('/')[1]) : 0;
+
+    const dbStatus = (!staffResponse.ok && !coachResponse.ok) ? 'error' : 'connected';
+    const dbError = !staffResponse.ok ? staffResponse.statusText : (!coachResponse.ok ? coachResponse.statusText : null);
+
     return new Response(
       JSON.stringify({
         status: dbStatus === 'connected' ? 'healthy' : 'degraded',
@@ -44,15 +64,15 @@ export async function onRequestGet(context) {
           jwt_secret_configured: !!env.JWT_SECRET
         }
       }),
-      { 
-        status: 200, 
-        headers: { 
+      {
+        status: 200,
+        headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*'
-        } 
+        }
       }
     );
-    
+
   } catch (err) {
     return new Response(
       JSON.stringify({

@@ -1,9 +1,6 @@
 {
   "name": "elitegbb-api-functions",
   "version": "1.0.0",
-  "description": "Cloudflare Pages Functions for EliteGBB API",
-  "dependencies": {
-    "@supabase/supabase-js": "^2.39.0",
-    "bcryptjs": "^2.4.3"
-  }
+  "description": "Cloudflare Pages Functions for EliteGBB API - Uses native fetch, no npm dependencies required",
+  "dependencies": {}
 }
