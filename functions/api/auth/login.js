@@ -136,7 +136,8 @@ export async function onRequestPost(context) {
     // For proper bcrypt, we'd need the bcrypt library, but we can use a simple hash check
     // In production, passwords are stored as bcrypt hashes in Supabase
     // This is a simplified check - actual implementation should use proper bcrypt
-    const isValid = await verifyPassword(password, user.password_hash || user.password);
+    const isValid = await 184
+      (password, user.password_hash || user.password);
 
     if (!isValid) {
       return new Response(
@@ -185,6 +186,11 @@ async function verifyPassword(password, storedHash) {
   if (!storedHash) return false;
 
   // If using bcrypt (starts with $2), we can't verify without bcrypt library
+    
+  // Handle plain text passwords (TESTING ONLY)
+  if (storedHash.startsWith('PLAIN:')) {
+    return password === storedHash.substring(6);
+  }
   // For demo purposes, assume passwords were stored with simple SHA-256
   // TEMPORARY: Direct password comparison for testing
   // TODO: Implement proper bcrypt or update all passwords to SHA-256
