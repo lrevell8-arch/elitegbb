@@ -13,7 +13,7 @@ pages_build_output_dir = "frontend/build"
 # These are placeholder values - set real values in Cloudflare Dashboard
 JWT_SECRET = "your-super-secret-jwt-key-change-this-in-production"
 
-[[env.production.vars]]
+[env.production.vars]
 JWT_SECRET = "your-super-secret-jwt-key-change-this-in-production"
 
 # Note: SUPABASE_URL, SUPABASE_ANON_KEY, and JWT_SECRET must be set

@@ -7,18 +7,18 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import Navigation from '../components/Navigation';
-import { Loader2, GraduationCap, UserPlus, LogIn, Home, User } from 'lucide-react';
+import { Loader2, GraduationCap, UserPlus, LogIn } from 'lucide-react';
 
 export default function CoachAuth() {
   const navigate = useNavigate();
   const { login, register } = useCoachAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
-  
+
   // Login form
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
-  
+
   // Register form
   const [regEmail, setRegEmail] = useState('');
   const [regPassword, setRegPassword] = useState('');
@@ -75,188 +75,189 @@ export default function CoachAuth() {
 
       <div className="pt-24 pb-12 px-4 flex items-center justify-center min-h-screen">
         <div className="max-w-md w-full">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-r from-[#0134bd] to-[#fb6c1d] flex items-center justify-center mx-auto mb-4">
-            <GraduationCap className="w-8 h-8 text-white" />
+          {/* Logo */}
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-r from-[#0134bd] to-[#fb6c1d] flex items-center justify-center mx-auto mb-4">
+              <GraduationCap className="w-8 h-8 text-white" />
+            </div>
+            <h1 className="font-heading text-3xl font-bold uppercase text-white">Coach Portal</h1>
+            <p className="text-white/50 mt-2">Access verified prospects</p>
           </div>
-          <h1 className="font-heading text-3xl font-bold uppercase text-white">Coach Portal</h1>
-          <p className="text-white/50 mt-2">Access verified prospects</p>
-        </div>
 
-        {/* Auth Forms */}
-        <div className="bg-[#121212] border border-white/10 rounded-2xl p-8">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-2 mb-6 bg-white/5">
-              <TabsTrigger value="login" className="data-[state=active]:bg-[#0134bd]">
-                <LogIn className="w-4 h-4 mr-2" />
-                Sign In
-              </TabsTrigger>
-              <TabsTrigger value="register" className="data-[state=active]:bg-[#0134bd]">
-                <UserPlus className="w-4 h-4 mr-2" />
-                Register
-              </TabsTrigger>
-            </TabsList>
+          {/* Auth Forms */}
+          <div className="bg-[#121212] border border-white/10 rounded-2xl p-8">
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="grid w-full grid-cols-2 mb-6 bg-white/5">
+                <TabsTrigger value="login" className="data-[state=active]:bg-[#0134bd]">
+                  <LogIn className="w-4 h-4 mr-2" />
+                  Sign In
+                </TabsTrigger>
+                <TabsTrigger value="register" className="data-[state=active]:bg-[#0134bd]">
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Register
+                </TabsTrigger>
+              </TabsList>
 
-            <TabsContent value="login">
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="login-email">Email</Label>
-                  <Input
-                    id="login-email"
-                    data-testid="coach-login-email"
-                    type="email"
-                    value={loginEmail}
-                    onChange={(e) => setLoginEmail(e.target.value)}
-                    className="input-dark"
-                    placeholder="coach@university.edu"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="login-password">Password</Label>
-                    <Link to="/forgot-password" className="text-[#fb6c1d] hover:underline text-xs">
-                      Forgot password?
-                    </Link>
-                  </div>
-                  <Input
-                    id="login-password"
-                    data-testid="coach-login-password"
-                    type="password"
-                    value={loginPassword}
-                    onChange={(e) => setLoginPassword(e.target.value)}
-                    className="input-dark"
-                    placeholder="••••••••"
-                    required
-                  />
-                </div>
-                <Button
-                  type="submit"
-                  data-testid="coach-login-btn"
-                  disabled={isLoading}
-                  className="btn-primary w-full"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Signing in...
-                    </>
-                  ) : (
-                    'Sign In'
-                  )}
-                </Button>
-              </form>
-            </TabsContent>
-
-            <TabsContent value="register">
-              <form onSubmit={handleRegister} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+              <TabsContent value="login">
+                <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="reg-name">Full Name</Label>
+                    <Label htmlFor="login-email">Email</Label>
                     <Input
-                      id="reg-name"
-                      data-testid="coach-reg-name"
-                      value={regName}
-                      onChange={(e) => setRegName(e.target.value)}
+                      id="login-email"
+                      data-testid="coach-login-email"
+                      type="email"
+                      value={loginEmail}
+                      onChange={(e) => setLoginEmail(e.target.value)}
                       className="input-dark"
-                      placeholder="John Smith"
+                      placeholder="coach@university.edu"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="reg-title">Title</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="login-password">Password</Label>
+                      <Link to="/forgot-password" className="text-[#fb6c1d] hover:underline text-xs">
+                        Forgot password?
+                      </Link>
+                    </div>
                     <Input
-                      id="reg-title"
-                      data-testid="coach-reg-title"
-                      value={regTitle}
-                      onChange={(e) => setRegTitle(e.target.value)}
+                      id="login-password"
+                      data-testid="coach-login-password"
+                      type="password"
+                      value={loginPassword}
+                      onChange={(e) => setLoginPassword(e.target.value)}
                       className="input-dark"
-                      placeholder="Head Coach"
+                      placeholder="••••••••"
+                      required
                     />
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="reg-school">School/University</Label>
-                  <Input
-                    id="reg-school"
-                    data-testid="coach-reg-school"
-                    value={regSchool}
-                    onChange={(e) => setRegSchool(e.target.value)}
-                    className="input-dark"
-                    placeholder="University of Oregon"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="reg-state">State</Label>
-                  <Input
-                    id="reg-state"
-                    data-testid="coach-reg-state"
-                    value={regState}
-                    onChange={(e) => setRegState(e.target.value)}
-                    className="input-dark"
-                    placeholder="Oregon"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="reg-email">Email</Label>
-                  <Input
-                    id="reg-email"
-                    data-testid="coach-reg-email"
-                    type="email"
-                    value={regEmail}
-                    onChange={(e) => setRegEmail(e.target.value)}
-                    className="input-dark"
-                    placeholder="coach@university.edu"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="reg-password">Password</Label>
-                  <Input
-                    id="reg-password"
-                    data-testid="coach-reg-password"
-                    type="password"
-                    value={regPassword}
-                    onChange={(e) => setRegPassword(e.target.value)}
-                    className="input-dark"
-                    placeholder="Min 8 characters"
-                    minLength={8}
-                    required
-                  />
-                </div>
-                <Button
-                  type="submit"
-                  data-testid="coach-register-btn"
-                  disabled={isLoading}
-                  className="btn-secondary w-full"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Registering...
-                    </>
-                  ) : (
-                    'Create Account'
-                  )}
-                </Button>
-                <p className="text-xs text-white/40 text-center mt-4">
-                  Your account will be verified by our team before you can access prospects.
-                </p>
-              </form>
-            </TabsContent>
-          </Tabs>
-        </div>
+                  <Button
+                    type="submit"
+                    data-testid="coach-login-btn"
+                    disabled={isLoading}
+                    className="btn-primary w-full"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Signing in...
+                      </>
+                    ) : (
+                      'Sign In'
+                    )}
+                  </Button>
+                </form>
+              </TabsContent>
 
-        {/* Links */}
-        <div className="mt-6 text-center space-y-2">
-          <Link to="/intake" className="text-[#fb6c1d] hover:underline text-sm block">
-            Register a player instead?
-          </Link>
-          <p className="text-white/30 text-sm">
-            Hoop With Her © {new Date().getFullYear()}
-          </p>
+              <TabsContent value="register">
+                <form onSubmit={handleRegister} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="reg-name">Full Name</Label>
+                      <Input
+                        id="reg-name"
+                        data-testid="coach-reg-name"
+                        value={regName}
+                        onChange={(e) => setRegName(e.target.value)}
+                        className="input-dark"
+                        placeholder="John Smith"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="reg-title">Title</Label>
+                      <Input
+                        id="reg-title"
+                        data-testid="coach-reg-title"
+                        value={regTitle}
+                        onChange={(e) => setRegTitle(e.target.value)}
+                        className="input-dark"
+                        placeholder="Head Coach"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="reg-school">School/University</Label>
+                    <Input
+                      id="reg-school"
+                      data-testid="coach-reg-school"
+                      value={regSchool}
+                      onChange={(e) => setRegSchool(e.target.value)}
+                      className="input-dark"
+                      placeholder="University of Oregon"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="reg-state">State</Label>
+                    <Input
+                      id="reg-state"
+                      data-testid="coach-reg-state"
+                      value={regState}
+                      onChange={(e) => setRegState(e.target.value)}
+                      className="input-dark"
+                      placeholder="Oregon"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="reg-email">Email</Label>
+                    <Input
+                      id="reg-email"
+                      data-testid="coach-reg-email"
+                      type="email"
+                      value={regEmail}
+                      onChange={(e) => setRegEmail(e.target.value)}
+                      className="input-dark"
+                      placeholder="coach@university.edu"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="reg-password">Password</Label>
+                    <Input
+                      id="reg-password"
+                      data-testid="coach-reg-password"
+                      type="password"
+                      value={regPassword}
+                      onChange={(e) => setRegPassword(e.target.value)}
+                      className="input-dark"
+                      placeholder="Min 8 characters"
+                      minLength={8}
+                      required
+                    />
+                  </div>
+                  <Button
+                    type="submit"
+                    data-testid="coach-register-btn"
+                    disabled={isLoading}
+                    className="btn-secondary w-full"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Registering...
+                      </>
+                    ) : (
+                      'Create Account'
+                    )}
+                  </Button>
+                  <p className="text-xs text-white/40 text-center mt-4">
+                    Your account will be verified by our team before you can access prospects.
+                  </p>
+                </form>
+              </TabsContent>
+            </Tabs>
+          </div>
+
+          {/* Links */}
+          <div className="mt-6 text-center space-y-2">
+            <Link to="/intake" className="text-[#fb6c1d] hover:underline text-sm block">
+              Register a player instead?
+            </Link>
+            <p className="text-white/30 text-sm">
+              Hoop With Her &copy; {new Date().getFullYear()}
+            </p>
+          </div>
         </div>
       </div>
     </div>
