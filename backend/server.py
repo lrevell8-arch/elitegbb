@@ -17,6 +17,13 @@ import csv
 import io
 import uuid
 
+# Supabase support
+try:
+    from supabase import create_client, Client
+    HAS_SUPABASE = True
+except ImportError:
+    HAS_SUPABASE = False
+
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
@@ -67,7 +74,25 @@ STRIPE_API_KEY = os.environ.get('STRIPE_API_KEY')
 
 # Check if Supabase is configured
 DATABASE_URL = os.environ.get('DATABASE_URL')
-USE_SUPABASE = DATABASE_URL and 'YOUR_PASSWORD_HERE' not in DATABASE_URL
+USE_SUPABASE = DATABASE_URL and 'YOUR_PASSWORD_HERE' not in DATABASE_URL and 'placeholder' not in DATABASE_URL.lower()
+
+# Supabase client initialization
+supabase_client: Optional[Client] = None
+if USE_SUPABASE and HAS_SUPABASE:
+    try:
+        # Extract Supabase URL and key from DATABASE_URL or use separate env vars
+        SUPABASE_URL = os.environ.get('SUPABASE_URL')
+        SUPABASE_KEY = os.environ.get('SUPABASE_ANON_KEY') or os.environ.get('SUPABASE_KEY')
+        
+        if SUPABASE_URL and SUPABASE_KEY:
+            supabase_client = create_client(SUPABASE_URL, SUPABASE_KEY)
+            logger.info("✅ Supabase client initialized")
+        else:
+            logger.warning("⚠️ SUPABASE_URL or SUPABASE_ANON_KEY not set. Set these for Supabase support.")
+            USE_SUPABASE = False
+    except Exception as e:
+        logger.error(f"❌ Failed to initialize Supabase client: {e}")
+        USE_SUPABASE = False
 
 # Demo mode - uses in-memory storage for testing (no external DB needed)
 DEMO_MODE = os.environ.get('DEMO_MODE', 'false').lower() == 'true'
@@ -177,6 +202,131 @@ if DEMO_MODE:
 else:
     mongo_client = AsyncIOMotorClient(mongo_url)
     mongo_db = mongo_client[db_name]
+
+# ============================================================================
+# SUPABASE DATABASE ABSTRACTION
+# Provides MongoDB-like interface for Supabase PostgreSQL
+# ============================================================================
+
+if USE_SUPABASE and supabase_client:
+    logger.info("🔌 Using Supabase as primary database")
+
+    class SupabaseCollection:
+        """Wraps Supabase table operations with MongoDB-like interface"""
+        def __init__(self, table_name: str):
+            self.table_name = table_name
+
+        async def find_one(self, query: dict, projection: dict = None):
+            """Find single document matching query"""
+            try:
+                # Build query
+                qb = supabase_client.table(self.table_name).select('*')
+                for key, value in query.items():
+                    qb = qb.eq(key, value)
+                
+                response = qb.limit(1).execute()
+                if response.data and len(response.data) > 0:
+                    return response.data[0]
+                return None
+            except Exception as e:
+                logger.error(f"Supabase find_one error on {self.table_name}: {e}")
+                return None
+
+        async def find(self, query: dict = None):
+            """Find all documents matching query"""
+            try:
+                qb = supabase_client.table(self.table_name).select('*')
+                if query:
+                    for key, value in query.items():
+                        qb = qb.eq(key, value)
+                
+                response = qb.execute()
+                return response.data or []
+            except Exception as e:
+                logger.error(f"Supabase find error on {self.table_name}: {e}")
+                return []
+
+        async def insert_one(self, document: dict):
+            """Insert single document"""
+            try:
+                # Convert datetime to ISO string for JSON serialization
+                doc = {}
+                for k, v in document.items():
+                    if isinstance(v, datetime):
+                        doc[k] = v.isoformat()
+                    else:
+                        doc[k] = v
+                
+                response = supabase_client.table(self.table_name).insert(doc).execute()
+                return type('obj', (object,), {'inserted_id': doc.get('id', str(uuid.uuid4()))})()
+            except Exception as e:
+                logger.error(f"Supabase insert_one error on {self.table_name}: {e}")
+                raise
+
+        async def update_one(self, query: dict, update: dict):
+            """Update single document matching query"""
+            try:
+                # Build query
+                qb = supabase_client.table(self.table_name).update(update.get('$set', update))
+                for key, value in query.items():
+                    qb = qb.eq(key, value)
+                
+                response = qb.execute()
+                modified = len(response.data) if response.data else 0
+                return type('obj', (object,), {'modified_count': modified})()
+            except Exception as e:
+                logger.error(f"Supabase update_one error on {self.table_name}: {e}")
+                return type('obj', (object,), {'modified_count': 0})()
+
+        async def delete_one(self, query: dict):
+            """Delete single document matching query"""
+            try:
+                qb = supabase_client.table(self.table_name).delete()
+                for key, value in query.items():
+                    qb = qb.eq(key, value)
+                
+                response = qb.execute()
+                deleted = len(response.data) if response.data else 0
+                return type('obj', (object,), {'deleted_count': deleted})()
+            except Exception as e:
+                logger.error(f"Supabase delete_one error on {self.table_name}: {e}")
+                return type('obj', (object,), {'deleted_count': 0})()
+
+        async def count_documents(self, query: dict = None):
+            """Count documents matching query"""
+            try:
+                qb = supabase_client.table(self.table_name).select('*', count='exact')
+                if query:
+                    for key, value in query.items():
+                        qb = qb.eq(key, value)
+                
+                response = qb.execute()
+                return response.count or 0
+            except Exception as e:
+                logger.error(f"Supabase count_documents error on {self.table_name}: {e}")
+                return 0
+
+        async def create_index(self, key: str, unique: bool = False):
+            """No-op for Supabase (indexes managed in Supabase dashboard)"""
+            pass
+
+    class SupabaseDB:
+        """Mock MongoDB database using Supabase tables"""
+        def __init__(self, client: Client):
+            self._client = client
+            self._tables = {}
+
+        def __getitem__(self, name: str):
+            if name not in self._tables:
+                self._tables[name] = SupabaseCollection(name)
+            return self._tables[name]
+
+        def __getattr__(self, name: str):
+            return self[name]
+
+    # Replace mongo_db with Supabase wrapper
+    mongo_db = SupabaseDB(supabase_client)
+    logger.info("✅ Supabase database abstraction layer initialized")
 
 # Auth utilities
 from passlib.context import CryptContext
