@@ -145,6 +145,16 @@ curl -X POST https://app.elitegbb.com/api/coach/login \
 - Check `staff_users` and `coaches` tables have the seeded data
 - Password hashes may need regeneration if bcrypt settings differ
 
+### ERROR: column "state" does not exist
+If intake form fails with this error, the `state` column is missing from the `players` table.
+
+**Quick Fix:** Run this SQL in Supabase SQL Editor:
+```sql
+ALTER TABLE players ADD COLUMN IF NOT EXISTS state TEXT;
+```
+
+Or run the full migration: [`supabase_migration_add_state.sql`](./supabase_migration_add_state.sql)
+
 ## 📚 Supabase Resources
 
 - [Supabase Documentation](https://supabase.com/docs)
