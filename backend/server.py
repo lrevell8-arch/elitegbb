@@ -83,6 +83,9 @@ JWT_SECRET = os.environ.get('JWT_SECRET', 'hwh-secret-key')
 JWT_ALGORITHM = os.environ.get('JWT_ALGORITHM', 'HS256')
 ACCESS_TOKEN_EXPIRE_HOURS = 24
 
+# Coach verification setting (default: true - requires admin approval)
+REQUIRE_COACH_VERIFICATION = os.environ.get('REQUIRE_COACH_VERIFICATION', 'true').lower() == 'true'
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -308,6 +311,13 @@ async def forgot_password(request: ForgotPasswordRequest, background_tasks: Back
             user = coach_user
             user_type = "coach"
             user_collection = "coach_users"
+        else:
+            # Try coaches collection (new coach registration collection)
+            coach = await mongo_db.coaches.find_one({"email": request.email})
+            if coach:
+                user = coach
+                user_type = "coach"
+                user_collection = "coaches"
 
     if not user:
         # Return success even if user not found (security best practice)
@@ -1781,8 +1791,8 @@ async def coach_login(request: CoachLoginRequest):
     if not coach.get("is_active", True):
         raise HTTPException(status_code=401, detail="Account is disabled")
     
-    if not coach.get("is_verified", False):
-        raise HTTPException(status_code=403, detail="Account pending verification. Please wait for admin approval.")
+    if REQUIRE_COACH_VERIFICATION and not coach.get("is_verified", False):
+        raise HTTPException(status_code=403, detail="Account pending verification. Please wait for admin approval or contact support.")
     
     token = create_access_token({
         "sub": coach["id"],
