@@ -465,7 +465,7 @@ export default function PlayerPortal() {
                           value={formData.height}
                           onChange={(e) => setFormData({ ...formData, height: e.target.value })}
                           className="bg-[#121212] border-white/10 text-white mt-2"
-                          placeholder="5'10\""
+                          placeholder={`5'10"`}
                         />
                       ) : (
                         <p className="text-2xl font-bold text-white mt-2">{player.height || '-'}</p>
