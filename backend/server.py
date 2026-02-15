@@ -69,11 +69,114 @@ STRIPE_API_KEY = os.environ.get('STRIPE_API_KEY')
 DATABASE_URL = os.environ.get('DATABASE_URL')
 USE_SUPABASE = DATABASE_URL and 'YOUR_PASSWORD_HERE' not in DATABASE_URL
 
+# Demo mode - uses in-memory storage for testing (no external DB needed)
+DEMO_MODE = os.environ.get('DEMO_MODE', 'false').lower() == 'true'
+
+# In-memory storage for demo mode
+_demo_storage = {
+    'staff_users': [],
+    'coaches': [],
+    'players': [],
+    'projects': [],
+    'password_reset_tokens': [],
+    'payment_transactions': []
+}
+
 # MongoDB connection for demo/fallback mode
 mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
 db_name = os.environ.get('DB_NAME', 'hwh_player_advantage')
-mongo_client = AsyncIOMotorClient(mongo_url)
-mongo_db = mongo_client[db_name]
+
+if DEMO_MODE:
+    logger.info("🎮 DEMO MODE ENABLED - Using in-memory storage")
+    mongo_client = None
+    mongo_db = None
+
+    class DemoCollection:
+        """In-memory collection mimicking MongoDB async interface"""
+        def __init__(self, name):
+            self.name = name
+            if name not in _demo_storage:
+                _demo_storage[name] = []
+
+        async def find_one(self, query, projection=None):
+            items = _demo_storage.get(self.name, [])
+            for item in items:
+                if all(item.get(k) == v for k, v in query.items()):
+                    return item.copy()
+            return None
+
+        async def find(self, query=None):
+            items = _demo_storage.get(self.name, [])
+            if not query:
+                return items.copy()
+            return [item for item in items if all(item.get(k) == v for k, v in query.items())]
+
+        async def insert_one(self, document):
+            _demo_storage[self.name].append(document)
+            return type('obj', (object,), {'inserted_id': document.get('id', str(uuid.uuid4()))})()
+
+        async def update_one(self, query, update):
+            items = _demo_storage.get(self.name, [])
+            for item in items:
+                if all(item.get(k) == v for k, v in query.items()):
+                    if '$set' in update:
+                        item.update(update['$set'])
+                    return type('obj', (object,), {'modified_count': 1})()
+            return type('obj', (object,), {'modified_count': 0})()
+
+        async def delete_one(self, query):
+            items = _demo_storage.get(self.name, [])
+            for i, item in enumerate(items):
+                if all(item.get(k) == v for k, v in query.items()):
+                    items.pop(i)
+                    return type('obj', (object,), {'deleted_count': 1})()
+            return type('obj', (object,), {'deleted_count': 0})()
+
+        async def count_documents(self, query=None):
+            items = _demo_storage.get(self.name, [])
+            if not query:
+                return len(items)
+            return sum(1 for item in items if all(item.get(k) == v for k, v in query.items()))
+
+        async def create_index(self, key, unique=False):
+            pass  # No-op for demo mode
+
+        def __getattr__(self, name):
+            return DemoCollection(f"{self.name}.{name}")
+
+    class DemoDB:
+        """Mock MongoDB database for demo mode"""
+        def __init__(self):
+            self._collections = {}
+
+        def __getitem__(self, name):
+            if name not in self._collections:
+                self._collections[name] = DemoCollection(name)
+            return self._collections[name]
+
+        def __getattr__(self, name):
+            return self[name]
+
+    mongo_db = DemoDB()
+
+    class MockMongoClient:
+        def __init__(self):
+            self.demo_db = DemoDB()
+        def __getitem__(self, name):
+            return self.demo_db
+        def __getattr__(self, name):
+            return self.demo_db
+        async def admin(self):
+            return self
+        async def command(self, cmd):
+            return {'ok': 1}
+        def close(self):
+            pass
+
+    mongo_client = MockMongoClient()
+else:
+    mongo_client = AsyncIOMotorClient(mongo_url)
+    mongo_db = mongo_client[db_name]
 
 # Auth utilities
 from passlib.context import CryptContext
@@ -212,6 +315,83 @@ async def root():
 @api_router.get("/health")
 async def health_check():
     return {"status": "healthy", "timestamp": datetime.now(timezone.utc).isoformat(), "database": "supabase" if USE_SUPABASE else "mongodb"}
+
+
+@api_router.get("/health/db")
+async def health_check_detailed():
+    """Detailed health check with database connectivity and user counts."""
+    db_status = "connected"
+    db_error = None
+    staff_count = 0
+    coach_count = 0
+    
+    try:
+        # Check MongoDB connection
+        await mongo_client.admin.command('ping')
+        staff_count = await mongo_db.staff_users.count_documents({})
+        coach_count = await mongo_db.coaches.count_documents({})
+    except Exception as e:
+        db_status = "error"
+        db_error = str(e)
+    
+    return {
+        "status": "healthy" if db_status == "connected" else "degraded",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "database": {
+            "type": "supabase" if USE_SUPABASE else "mongodb",
+            "status": db_status,
+            "error": db_error,
+            "mongo_url_configured": bool(os.environ.get('MONGO_URL')),
+            "database_url_configured": bool(os.environ.get('DATABASE_URL') and 'YOUR_PASSWORD' not in os.environ.get('DATABASE_URL', ''))
+        },
+        "users": {
+            "staff_users": staff_count,
+            "coaches": coach_count,
+            "total": staff_count + coach_count
+        },
+        "environment": {
+            "email_provider": os.environ.get('EMAIL_PROVIDER', 'mock'),
+            "require_coach_verification": REQUIRE_COACH_VERIFICATION,
+            "stripe_configured": bool(STRIPE_API_KEY and 'your_stripe' not in (STRIPE_API_KEY or ''))
+        }
+    }
+
+
+@api_router.post("/auth/setup")
+async def setup_admin():
+    """Create initial admin user if no users exist. Only works when database is empty."""
+    try:
+        staff_count = await mongo_db.staff_users.count_documents({})
+        
+        if staff_count > 0:
+            return {
+                "message": "Setup already complete",
+                "existing_users": staff_count,
+                "note": "Admin user already exists. Use /auth/login to authenticate."
+            }
+        
+        # Create default admin user
+        admin_user = {
+            "id": str(uuid.uuid4()),
+            "email": "admin@hoopwithher.com",
+            "password_hash": hash_password("AdminPass123!"),
+            "name": "System Administrator",
+            "role": "admin",
+            "is_active": True,
+            "is_verified": True,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        
+        await mongo_db.staff_users.insert_one(admin_user)
+        
+        return {
+            "message": "Initial admin user created successfully",
+            "admin_email": "admin@hoopwithher.com",
+            "admin_password": "AdminPass123!",
+            "warning": "Change this password immediately after first login!"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Setup failed: {str(e)}")
 
 
 # ============ AUTH ROUTES ============
@@ -2107,7 +2287,7 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup():
-    """Create indexes on startup."""
+    """Create indexes on startup and seed demo data if needed."""
     # Create indexes for MongoDB collections
     await mongo_db.players.create_index("player_key", unique=True)
     await mongo_db.players.create_index("grad_class")
@@ -2119,6 +2299,55 @@ async def startup():
     await mongo_db.projects.create_index("player_id")
     await mongo_db.payment_transactions.create_index("session_id", unique=True)
     logger.info("MongoDB indexes created/verified")
+
+    # Auto-seed test users in demo mode
+    if DEMO_MODE:
+        await _seed_demo_data()
+
+
+async def _seed_demo_data():
+    """Seed demo mode with test users for immediate testing."""
+    try:
+        # Check if admin already exists
+        existing_admin = await mongo_db.staff_users.find_one({"email": "admin@hoopwithher.com"})
+        if not existing_admin:
+            # Create admin user
+            admin_user = {
+                "id": str(uuid.uuid4()),
+                "email": "admin@hoopwithher.com",
+                "password_hash": hash_password("AdminPass123!"),
+                "name": "System Administrator",
+                "role": "admin",
+                "is_active": True,
+                "is_verified": True,
+                "created_at": datetime.now(timezone.utc).isoformat()
+            }
+            await mongo_db.staff_users.insert_one(admin_user)
+            logger.info("✅ Demo admin user created: admin@hoopwithher.com / AdminPass123!")
+
+        # Check if test coach already exists
+        existing_coach = await mongo_db.coaches.find_one({"email": "coach@university.edu"})
+        if not existing_coach:
+            # Create test coach (auto-verified for demo)
+            test_coach = {
+                "id": str(uuid.uuid4()),
+                "email": "coach@university.edu",
+                "password_hash": hash_password("CoachPass123!"),
+                "name": "Coach Johnson",
+                "school": "University State",
+                "title": "Head Coach",
+                "state": "CA",
+                "is_active": True,
+                "is_verified": True,  # Auto-verified for demo
+                "saved_players": [],
+                "created_at": datetime.now(timezone.utc).isoformat()
+            }
+            await mongo_db.coaches.insert_one(test_coach)
+            logger.info("✅ Demo coach created: coach@university.edu / CoachPass123!")
+
+        logger.info("🎮 Demo mode ready! Test users initialized.")
+    except Exception as e:
+        logger.error(f"Failed to seed demo data: {e}")
 
 
 @app.on_event("shutdown")
