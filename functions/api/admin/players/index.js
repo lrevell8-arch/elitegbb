@@ -84,8 +84,15 @@ export async function onRequestGet(context) {
     const status = url.searchParams.get('status');
     const verified = url.searchParams.get('verified');
     const search = url.searchParams.get('search');
-    const limit = parseInt(url.searchParams.get('limit')) || 100;
-    const offset = parseInt(url.searchParams.get('offset')) || 0;
+    const grad_class = url.searchParams.get('grad_class');
+    const position = url.searchParams.get('position');
+    const gender = url.searchParams.get('gender');
+
+    // Support both limit/offset and page/page_size
+    const page = parseInt(url.searchParams.get('page')) || 1;
+    const page_size = parseInt(url.searchParams.get('page_size')) || 20;
+    const limit = parseInt(url.searchParams.get('limit')) || page_size;
+    const offset = parseInt(url.searchParams.get('offset')) || ((page - 1) * page_size);
 
     let params = {
       select: '*',
@@ -94,12 +101,21 @@ export async function onRequestGet(context) {
       offset
     };
 
-    // Apply filters
+    // Apply Supabase filters (exact match)
     if (status) {
       params.eq = { ...params.eq, payment_status: status };
     }
-    if (verified !== null) {
+    if (verified !== null && verified !== '') {
       params.eq = { ...params.eq, verified: verified === 'true' };
+    }
+    if (grad_class) {
+      params.eq = { ...params.eq, grad_class: grad_class };
+    }
+    if (position) {
+      params.eq = { ...params.eq, primary_position: position };
+    }
+    if (gender) {
+      params.eq = { ...params.eq, gender: gender };
     }
 
     const { data: players, error } = await supabaseQuery(env, 'players', 'GET', params);
@@ -111,23 +127,29 @@ export async function onRequestGet(context) {
       );
     }
 
+    // Store total before client-side filtering for pagination
+    const totalBeforeFilter = players?.length || 0;
+
     // Simple search filter (client-side for now)
     let filteredPlayers = players || [];
     if (search) {
       const searchLower = search.toLowerCase();
-      filteredPlayers = filteredPlayers.filter(p => 
+      filteredPlayers = filteredPlayers.filter(p =>
         (p.player_name || '').toLowerCase().includes(searchLower) ||
         (p.player_key || '').toLowerCase().includes(searchLower) ||
-        (p.school || '').toLowerCase().includes(searchLower)
+        (p.school || '').toLowerCase().includes(searchLower) ||
+        (p.city || '').toLowerCase().includes(searchLower)
       );
     }
 
     return new Response(
       JSON.stringify({
         players: filteredPlayers,
-        total: filteredPlayers.length,
+        total: totalBeforeFilter,
         limit,
-        offset
+        offset,
+        page,
+        page_size
       }),
       { status: 200, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
     );
