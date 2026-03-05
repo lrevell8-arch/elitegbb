@@ -8,7 +8,7 @@ import { Input } from '../components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { 
   ArrowLeft, Loader2, Search, User, Calendar, 
-  MapPin, ChevronRight, CheckCircle, Filter
+  MapPin, ChevronRight, CheckCircle, Filter, Sparkles
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
@@ -206,10 +206,19 @@ export default function PlayerDirectory() {
                 >
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#0134bd] to-[#fb6c1d] flex items-center justify-center flex-shrink-0">
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 relative ${
+                        player.package_selected === 'free' || player.payment_status === 'free' || !player.package_selected
+                          ? 'bg-gradient-to-br from-[#8f33e6] to-[#fb6c1d]' 
+                          : 'bg-gradient-to-br from-[#0134bd] to-[#fb6c1d]'
+                      }`}>
                         <span className="font-heading font-bold text-white text-lg">
                           {player.player_name?.[0]?.toUpperCase()}
                         </span>
+                        {(player.package_selected === 'free' || player.payment_status === 'free' || !player.package_selected) && (
+                          <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #8f33e6 0%, #fb6c1d 100%)' }}>
+                            <Sparkles className="w-2 h-2 text-white" />
+                          </div>
+                        )}
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
@@ -255,6 +264,12 @@ export default function PlayerDirectory() {
                         <CheckCircle className="w-4 h-4 mr-1" />
                         {player.verified ? 'Verified' : 'Verify'}
                       </Button>
+                      {(player.package_selected === 'free' || player.payment_status === 'free' || !player.package_selected) && (
+                        <span className="px-2 py-1 rounded text-xs font-medium bg-[#8f33e6]/20 text-[#8f33e6] border border-[#8f33e6]/30 flex items-center gap-1">
+                          <Sparkles className="w-3 h-3" />
+                          FREE
+                        </span>
+                      )}
                       <span className={`px-2 py-1 rounded text-xs font-medium ${
                         player.gender === 'female' 
                           ? 'bg-pink-500/10 text-pink-400' 

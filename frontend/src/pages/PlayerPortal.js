@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Label } from '../components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
+import { WatermarkOverlay } from '../components/ui/watermark-overlay';
 import { Separator } from '../components/ui/separator';
 import {
   Loader2,
@@ -212,16 +213,19 @@ export default function PlayerPortal() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="relative">
-                <Avatar className="h-20 w-20 border-2 border-[#8f33e6]">
-                  <AvatarImage src={player.profile_image_url} />
-                  <AvatarFallback className="bg-[#1a1a1a] text-white text-xl">
-                    {player.player_name?.split(' ').map(n => n[0]).join('') || <User />}
-                  </AvatarFallback>
-                </Avatar>
+                <WatermarkOverlay isFreeTier={isFreeTier} watermarkText="FREE PROFILE">
+                  <Avatar className="h-20 w-20 border-2 border-[#8f33e6]">
+                    <AvatarImage src={player.profile_image_url} />
+                    <AvatarFallback className="bg-[#1a1a1a] text-white text-xl">
+                      {player.player_name?.split(' ').map(n => n[0]).join('') || <User />}
+                    </AvatarFallback>
+                  </Avatar>
+                </WatermarkOverlay>
                 <button
                   onClick={handleImageClick}
                   disabled={isUploading}
                   className="absolute bottom-0 right-0 p-1.5 bg-[#8f33e6] rounded-full hover:bg-[#8f33e6]/80 transition-colors disabled:opacity-50"
+                  style={{ zIndex: 30 }}
                 >
                   {isUploading ? (
                     <Loader2 className="w-4 h-4 text-white animate-spin" />
