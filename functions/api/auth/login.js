@@ -39,20 +39,31 @@ async function supabaseQuery(env, table, method, params = {}) {
   if (params.limit) queryParams.append('limit', params.limit);
 
   const fullUrl = queryParams.toString() ? `${url}?${queryParams.toString()}` : url;
+  
+  console.log('Supabase query URL:', fullUrl.replace(env.SUPABASE_URL, '[SUPABASE_URL]'));
 
-  const response = await fetch(fullUrl, {
-    method,
-    headers,
-    body: params.body ? JSON.stringify(params.body) : undefined
-  });
+  try {
+    const response = await fetch(fullUrl, {
+      method,
+      headers,
+      body: params.body ? JSON.stringify(params.body) : undefined
+    });
 
-  if (!response.ok) {
-    const error = await response.text();
-    return { data: null, error: { message: error, status: response.status } };
+    console.log('Supabase response status:', response.status, response.statusText);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Supabase error response:', errorText);
+      return { data: null, error: { message: errorText, status: response.status, statusText: response.statusText } };
+    }
+
+    const data = await response.json();
+    console.log('Supabase data received:', Array.isArray(data) ? `Array(${data.length})` : typeof data);
+    return { data: data.length === 1 ? data[0] : data, error: null };
+  } catch (fetchError) {
+    console.error('Supabase fetch error:', fetchError.message);
+    return { data: null, error: { message: fetchError.message, status: 0, type: 'network_error' } };
   }
-
-  const data = await response.json();
-  return { data: data.length === 1 ? data[0] : data, error: null };
 }
 
 // Generate JWT using Web Crypto
@@ -116,21 +127,24 @@ export async function onRequestPost(context) {
 
     // Look up user by email using Supabase REST API
     console.log('Querying Supabase for user:', email.toLowerCase());
+    console.log('Supabase URL:', env.SUPABASE_URL ? 'configured' : 'missing');
+    console.log('Supabase Key:', env.SUPABASE_ANON_KEY ? 'configured (length: ' + env.SUPABASE_ANON_KEY.length + ')' : 'missing');
+    
     const { data: user, error } = await supabaseQuery(env, 'staff_users', 'GET', {
       select: '*',
       eq: { email: email.toLowerCase() }
     });
 
     if (error) {
-      console.error('Supabase query error:', error);
+      console.error('Supabase query error:', JSON.stringify(error));
       return new Response(
-        JSON.stringify({ detail: 'Invalid email or password' }),
+        JSON.stringify({ detail: 'Invalid email or password', debug: 'Query error: ' + JSON.stringify(error) }),
         { status: 401, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
     if (!user) {
-      console.log('User not found:', email);
+      console.log('User not found in staff_users:', email);
       return new Response(
         JSON.stringify({ detail: 'Invalid email or password' }),
         { status: 401, headers: { 'Content-Type': 'application/json' } }
