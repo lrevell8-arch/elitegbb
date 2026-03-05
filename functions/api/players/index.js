@@ -215,88 +215,34 @@ export async function onRequestPost(context) {
     // Generate a temporary password for the player
     const tempPassword = await hashPassword('TempPass123!');
 
-    // Build player data using ONLY columns that exist in Supabase
-    // Based on testing: id, created_at, updated_at, user_id, player_id, email, name,
-    // first_name, last_name, full_name exist - other columns may not
+    // Build player data matching the ACTUAL Supabase schema
+    // Columns: id, player_key, player_name, preferred_name, instagram_handle,
+    // dob, grad_class, gender, school, city, state, primary_position, 
+    // secondary_position, jersey_number, height, weight, parent_name, 
+    // parent_email, parent_phone, player_email, created_at, updated_at
     const isFreeTier = body.package_selected === 'free';
     
-    // Prepare the data payload - start minimal and add fields that might work
+    // Prepare the data payload with correct column names
     const playerData = {
-      // Core fields that should exist
-      name: body.player_name,
-      email: body.player_email || body.parent_email,
-      first_name: body.player_name.split(' ')[0] || body.player_name,
-      last_name: body.player_name.split(' ').slice(1).join(' ') || '',
-      full_name: body.player_name,
-      
-      // Store everything else in player_id field as a JSON string
-      // This is a workaround for schema mismatch issues
-      player_id: playerKey,
-      
-      // Store password and extended data in user_id as JSON
-      user_id: JSON.stringify({
-        player_key: playerKey,
-        password_hash: tempPassword,
-        graduation_year: body.grad_class ? parseInt(body.grad_class) : null,
-        school: body.school || null,
-        state: body.state || null,
-        height: body.height || null,
-        weight: body.weight ? parseInt(body.weight) : null,
-        positions: body.secondary_position
-          ? [body.primary_position, body.secondary_position]
-          : [body.primary_position],
-        gender: body.gender,
-        primary_position: body.primary_position,
-        secondary_position: body.secondary_position || null,
-        stats: {
-          ppg: body.ppg,
-          rpg: body.rpg,
-          apg: body.apg,
-          spg: body.spg,
-          bpg: body.bpg,
-          fg_pct: body.fg_pct,
-          three_pct: body.three_pct,
-          ft_pct: body.ft_pct
-        },
-        instagram: body.instagram_handle || null,
-        parent_name: body.parent_name,
-        parent_email: body.parent_email,
-        parent_phone: body.parent_phone || null,
-        is_verified: false,
-        payment_status: isFreeTier ? 'free' : 'pending',
-        package_selected: body.package_selected || null,
-        is_free_tier: isFreeTier,
-        // All extended intake data
-        intake_data: {
-          preferred_name: body.preferred_name,
-          dob: body.dob,
-          jersey_number: body.jersey_number,
-          city: body.city,
-          level: body.level,
-          team_names: body.team_names,
-          league_region: body.league_region,
-          self_evaluation: {
-            self_words: body.self_words,
-            strength: body.strength,
-            improvement: body.improvement,
-            separation: body.separation,
-            adversity_response: body.adversity_response,
-            iq_self_rating: body.iq_self_rating,
-            pride_tags: body.pride_tags,
-            player_model: body.player_model
-          },
-          film_links: body.film_links,
-          highlight_links: body.highlight_links,
-          other_socials: body.other_socials,
-          goal: body.goal,
-          colleges_interest: body.colleges_interest,
-          consent_eval: body.consent_eval,
-          consent_media: body.consent_media,
-          guardian_signature: body.guardian_signature,
-          signature_date: body.signature_date
-        },
-        created_at: new Date().toISOString()
-      })
+      player_key: playerKey,
+      player_name: body.player_name,
+      preferred_name: body.preferred_name || null,
+      instagram_handle: body.instagram_handle || null,
+      dob: body.dob || null,
+      grad_class: body.grad_class,
+      gender: body.gender,
+      school: body.school || 'Unknown School',
+      city: body.city || 'Unknown City',
+      state: body.state || 'Unknown State',
+      primary_position: body.primary_position,
+      secondary_position: body.secondary_position || null,
+      jersey_number: body.jersey_number ? parseInt(body.jersey_number) : null,
+      height: body.height || null,
+      weight: body.weight ? parseInt(body.weight) : null,
+      parent_name: body.parent_name,
+      parent_email: body.parent_email,
+      parent_phone: body.parent_phone || null,
+      player_email: body.player_email || null
     };
 
     console.log('Inserting player data into Supabase...');
@@ -385,10 +331,23 @@ export async function onRequestPost(context) {
     const packagePrice = packagePrices[body.package_selected] || 0;
 
     // Return player data with payment info
+    const createdPlayer = data[0];
     return new Response(
       JSON.stringify({ 
         success: true, 
-        player: data[0], 
+        player: {
+          id: createdPlayer.id,
+          player_key: createdPlayer.player_key,
+          player_name: createdPlayer.player_name,
+          grad_class: createdPlayer.grad_class,
+          gender: createdPlayer.gender,
+          primary_position: createdPlayer.primary_position,
+          school: createdPlayer.school,
+          city: createdPlayer.city,
+          state: createdPlayer.state,
+          parent_email: createdPlayer.parent_email,
+          created_at: createdPlayer.created_at
+        }, 
         player_key: playerKey,
         message: isFreeTier ? 'Free profile created successfully! Upgrade anytime.' : 'Player created successfully',
         payment_required: !isFreeTier && packagePrice > 0,
