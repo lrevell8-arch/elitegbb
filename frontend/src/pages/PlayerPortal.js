@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 import { usePlayerAuth } from '../context/PlayerAuthContext';
 import { toast } from 'sonner';
 import { Input } from '../components/ui/input';
@@ -29,7 +30,12 @@ import {
   Star,
   ArrowRight,
   Lock as LockIcon,
-  Check
+  Check,
+  FileText,
+  Image,
+  FileStack,
+  ExternalLink,
+  Download
 } from 'lucide-react';
 
 export default function PlayerPortal() {
@@ -69,6 +75,13 @@ export default function PlayerPortal() {
     new_password: '',
     confirm_password: ''
   });
+
+  // Deliverable generation state
+  const [generatingDeliverable, setGeneratingDeliverable] = useState(false);
+  const [showDeliverableModal, setShowDeliverableModal] = useState(false);
+  const [deliverableType, setDeliverableType] = useState('one-pager');
+
+  const API_URL = process.env.REACT_APP_BACKEND_URL;
 
   useEffect(() => {
     if (player) {
@@ -165,6 +178,48 @@ export default function PlayerPortal() {
       toast.error(error.response?.data?.detail || 'Failed to change password');
     } finally {
       setIsChangingPassword(false);
+    }
+  };
+
+  // Deliverable generation handlers
+  const openDeliverableModal = () => {
+    setDeliverableType('one-pager');
+    setShowDeliverableModal(true);
+  };
+
+  const closeDeliverableModal = () => {
+    setShowDeliverableModal(false);
+    setGeneratingDeliverable(false);
+  };
+
+  const generateDeliverable = async () => {
+    setGeneratingDeliverable(true);
+
+    try {
+      // Open deliverable in new tab using player endpoint
+      const url = `${API_URL}/api/player/deliverables/${deliverableType}`;
+      window.open(url, '_blank');
+      toast.success(`${deliverableType.replace('-', ' ')} opened in new tab`);
+    } catch (error) {
+      console.error('Error generating deliverable:', error);
+      toast.error('Failed to generate deliverable');
+    } finally {
+      setGeneratingDeliverable(false);
+      setShowDeliverableModal(false);
+    }
+  };
+
+  const viewBadge = async () => {
+    setGeneratingDeliverable(true);
+    try {
+      const url = `${API_URL}/api/player/deliverables/badge?format=html`;
+      window.open(url, '_blank');
+      toast.success('Your verified badge opened in new tab');
+    } catch (error) {
+      console.error('Error viewing badge:', error);
+      toast.error('Failed to view badge');
+    } finally {
+      setGeneratingDeliverable(false);
     }
   };
 
@@ -320,6 +375,13 @@ export default function PlayerPortal() {
               <Users className="w-4 h-4 mr-2" />
               Connections
             </TabsTrigger>
+            {/* Deliverables Tab - Only for paid tiers */}
+            {!isFreeTier && (
+              <TabsTrigger value="deliverables" className="data-[state=active]:bg-[#0134bd] data-[state=active]:text-white">
+                <FileStack className="w-4 h-4 mr-2" />
+                Deliverables
+              </TabsTrigger>
+            )}
             {isFreeTier && (
               <TabsTrigger value="upgrade" className="data-[state=active]:bg-[#fb6c1d] data-[state=active]:text-white">
                 <Sparkles className="w-4 h-4 mr-2" />
@@ -652,6 +714,144 @@ export default function PlayerPortal() {
             </Card>
           </TabsContent>
 
+          {/* Deliverables Tab - Only for paid tiers */}
+          {!isFreeTier && (
+            <TabsContent value="deliverables">
+              <Card className="bg-[#121212] border-white/10">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <FileStack className="w-5 h-5 text-[#0134bd]" />
+                    Your Deliverables
+                  </CardTitle>
+                  <CardDescription className="text-gray-400">
+                    Access your recruiting documents and verified prospect badge
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Verified Badge Section */}
+                  {player.verified && (
+                    <div className="bg-gradient-to-r from-[#0134bd]/10 to-[#fb6c1d]/10 border border-[#0134bd]/20 rounded-xl p-6">
+                      <div className="flex items-center gap-4 mb-4">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#0134bd] to-[#fb6c1d] flex items-center justify-center">
+                          <Image className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-white">Verified Prospect Badge</h3>
+                          <p className="text-sm text-gray-400">Show off your verified status</p>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-3">
+                        <Button
+                          onClick={viewBadge}
+                          disabled={generatingDeliverable}
+                          variant="outline"
+                          className="border-[#0134bd]/30 text-[#0134bd] hover:bg-[#0134bd]/10"
+                        >
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                          View Badge
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            const url = `${API_URL}/api/player/deliverables/badge?format=svg`;
+                            window.open(url, '_blank');
+                          }}
+                          disabled={generatingDeliverable}
+                          variant="outline"
+                          className="border-purple-500/30 text-purple-400 hover:bg-purple-500/10"
+                        >
+                          <Download className="w-4 h-4 mr-2" />
+                          Download SVG
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Recruiting Documents */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Card className="bg-[#1a1a1a] border-white/10 hover:border-[#0134bd]/50 transition-colors">
+                      <CardContent className="p-6">
+                        <div className="w-12 h-12 rounded-lg bg-[#0134bd]/20 flex items-center justify-center mb-4">
+                          <FileText className="w-6 h-6 text-[#0134bd]" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-white mb-2">Recruiting One-Pager</h3>
+                        <p className="text-sm text-gray-400 mb-4">
+                          Complete player profile with stats and contact information for coaches
+                        </p>
+                        <Button
+                          onClick={() => {
+                            setDeliverableType('one-pager');
+                            generateDeliverable();
+                          }}
+                          disabled={generatingDeliverable}
+                          variant="outline"
+                          className="w-full border-[#0134bd]/30 text-[#0134bd] hover:bg-[#0134bd]/10"
+                        >
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                          View Document
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-[#1a1a1a] border-white/10 hover:border-[#fb6c1d]/50 transition-colors">
+                      <CardContent className="p-6">
+                        <div className="w-12 h-12 rounded-lg bg-[#fb6c1d]/20 flex items-center justify-center mb-4">
+                          <TrendingUp className="w-6 h-6 text-[#fb6c1d]" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-white mb-2">Tracking Profile</h3>
+                        <p className="text-sm text-gray-400 mb-4">
+                          Progress tracking document with metrics and development goals
+                        </p>
+                        <Button
+                          onClick={() => {
+                            setDeliverableType('tracking-profile');
+                            generateDeliverable();
+                          }}
+                          disabled={generatingDeliverable}
+                          variant="outline"
+                          className="w-full border-[#fb6c1d]/30 text-[#fb6c1d] hover:bg-[#fb6c1d]/10"
+                        >
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                          View Document
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-[#1a1a1a] border-white/10 hover:border-purple-500/50 transition-colors">
+                      <CardContent className="p-6">
+                        <div className="w-12 h-12 rounded-lg bg-purple-500/20 flex items-center justify-center mb-4">
+                          <FileText className="w-6 h-6 text-purple-500" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-white mb-2">Film Index</h3>
+                        <p className="text-sm text-gray-400 mb-4">
+                          Complete catalog of your game film and highlight reels
+                        </p>
+                        <Button
+                          onClick={() => {
+                            setDeliverableType('film-index');
+                            generateDeliverable();
+                          }}
+                          disabled={generatingDeliverable}
+                          variant="outline"
+                          className="w-full border-purple-500/30 text-purple-400 hover:bg-purple-500/10"
+                        >
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                          View Document
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                    <p className="text-sm text-gray-400 text-center">
+                      These documents are generated from your profile data and can be shared with college coaches. 
+                      Keep your profile updated for the most accurate documents.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
+
           {/* Connections Tab */}
           <TabsContent value="connections">
             <Card className="bg-[#121212] border-white/10">
@@ -889,6 +1089,111 @@ export default function PlayerPortal() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Deliverable Modal */}
+      {showDeliverableModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-[#121212] border border-white/10 rounded-2xl w-full max-w-md">
+            <div className="p-6 border-b border-white/10">
+              <h2 className="font-heading text-xl font-bold uppercase text-white flex items-center gap-2">
+                <FileStack className="w-5 h-5 text-[#0134bd]" />
+                View Deliverable
+              </h2>
+              <p className="text-white/50 text-sm mt-1">
+                Select a document type to view
+              </p>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-1 gap-3">
+                <button
+                  onClick={() => setDeliverableType('one-pager')}
+                  className={`p-4 rounded-xl border text-left transition-colors ${
+                    deliverableType === 'one-pager'
+                      ? 'bg-[#0134bd]/20 border-[#0134bd] text-white'
+                      : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-[#0134bd]/20 flex items-center justify-center">
+                      <FileText className="w-5 h-5 text-[#0134bd]" />
+                    </div>
+                    <div>
+                      <div className="font-medium">Recruiting One-Pager</div>
+                      <div className="text-xs text-white/50 mt-1">Complete profile with stats</div>
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => setDeliverableType('tracking-profile')}
+                  className={`p-4 rounded-xl border text-left transition-colors ${
+                    deliverableType === 'tracking-profile'
+                      ? 'bg-[#fb6c1d]/20 border-[#fb6c1d] text-white'
+                      : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-[#fb6c1d]/20 flex items-center justify-center">
+                      <TrendingUp className="w-5 h-5 text-[#fb6c1d]" />
+                    </div>
+                    <div>
+                      <div className="font-medium">Tracking Profile</div>
+                      <div className="text-xs text-white/50 mt-1">Progress and metrics</div>
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => setDeliverableType('film-index')}
+                  className={`p-4 rounded-xl border text-left transition-colors ${
+                    deliverableType === 'film-index'
+                      ? 'bg-purple-500/20 border-purple-500 text-white'
+                      : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                      <FileText className="w-5 h-5 text-purple-500" />
+                    </div>
+                    <div>
+                      <div className="font-medium">Film Index</div>
+                      <div className="text-xs text-white/50 mt-1">Film catalog</div>
+                    </div>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 border-t border-white/10 flex gap-3">
+              <Button
+                onClick={generateDeliverable}
+                disabled={generatingDeliverable}
+                className="flex-1 bg-[#0134bd] hover:bg-[#0134bd]/90 text-white"
+              >
+                {generatingDeliverable ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Opening...
+                  </>
+                ) : (
+                  <>
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    View Document
+                  </>
+                )}
+              </Button>
+              <Button
+                onClick={closeDeliverableModal}
+                variant="ghost"
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

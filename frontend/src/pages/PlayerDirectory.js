@@ -8,7 +8,8 @@ import { Input } from '../components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { 
   ArrowLeft, Loader2, Search, User, Calendar, 
-  MapPin, ChevronRight, CheckCircle, Filter, Sparkles
+  MapPin, ChevronRight, CheckCircle, Filter, Sparkles,
+  FileText, Image, Download, FileSpreadsheet, FileStack
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
@@ -29,6 +30,13 @@ export default function PlayerDirectory() {
     gender: '',
     verified: ''
   });
+
+  // Deliverable generation state
+  const [generatingForPlayer, setGeneratingForPlayer] = useState(null);
+  const [showDeliverableModal, setShowDeliverableModal] = useState(false);
+  const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const [deliverableType, setDeliverableType] = useState('onepager'); // onepager, tracking, filmindex
+  const [deliverableFormat, setDeliverableFormat] = useState('pdf'); // pdf, badge
 
   const fetchPlayers = useCallback(async () => {
     setLoading(true);
@@ -95,6 +103,73 @@ export default function PlayerDirectory() {
   };
 
   const totalPages = Math.ceil(total / 20);
+
+  // Deliverable generation handlers
+  const openDeliverableModal = (player) => {
+    setSelectedPlayer(player);
+    setDeliverableType('onepager');
+    setDeliverableFormat('pdf');
+    setShowDeliverableModal(true);
+  };
+
+  const closeDeliverableModal = () => {
+    setShowDeliverableModal(false);
+    setSelectedPlayer(null);
+    setGeneratingForPlayer(null);
+  };
+
+  const generateDeliverable = async () => {
+    if (!selectedPlayer) return;
+
+    setGeneratingForPlayer(selectedPlayer.id);
+
+    try {
+      if (deliverableFormat === 'pdf') {
+        // Open PDF in new tab
+        const url = `${API_URL}/api/admin/deliverables/pdf/${deliverableType}/${selectedPlayer.id}`;
+        window.open(url, '_blank');
+        toast.success(`${deliverableType} PDF opened in new tab`);
+      } else if (deliverableFormat === 'badge') {
+        // Open badge in new tab
+        const url = `${API_URL}/api/admin/deliverables/badge/${selectedPlayer.id}?format=png`;
+        window.open(url, '_blank');
+        toast.success('Badge opened in new tab');
+      }
+    } catch (error) {
+      console.error('Error generating deliverable:', error);
+      toast.error('Failed to generate deliverable');
+    } finally {
+      setGeneratingForPlayer(null);
+    }
+  };
+
+  const downloadBadge = async (playerId, playerName) => {
+    setGeneratingForPlayer(playerId);
+    try {
+      const response = await axios.get(
+        `${API_URL}/api/admin/deliverables/badge/${playerId}?format=svg`,
+        { headers: getAuthHeaders() }
+      );
+
+      if (response.data && response.data.svg) {
+        const blob = new Blob([response.data.svg], { type: 'image/svg+xml' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `hwh_badge_${playerName.replace(/\s+/g, '_').toLowerCase()}.svg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        toast.success('Badge downloaded');
+      }
+    } catch (error) {
+      console.error('Error downloading badge:', error);
+      toast.error('Failed to download badge');
+    } finally {
+      setGeneratingForPlayer(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#0b0b0b]">
@@ -264,6 +339,36 @@ export default function PlayerDirectory() {
                         <CheckCircle className="w-4 h-4 mr-1" />
                         {player.verified ? 'Verified' : 'Verify'}
                       </Button>
+                      
+                      {/* Deliverable Actions */}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => openDeliverableModal(player)}
+                        disabled={generatingForPlayer === player.id}
+                        className="text-[#0134bd] hover:text-[#0134bd]/80"
+                        title="Generate deliverables"
+                      >
+                        {generatingForPlayer === player.id ? (
+                          <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                        ) : (
+                          <FileStack className="w-4 h-4 mr-1" />
+                        )}
+                        Deliverables
+                      </Button>
+
+                      {/* Quick Badge Download */}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => downloadBadge(player.id, player.player_name)}
+                        disabled={generatingForPlayer === player.id}
+                        className="text-purple-400 hover:text-purple-300"
+                        title="Download badge"
+                      >
+                        <Image className="w-4 h-4" />
+                      </Button>
+
                       {(player.package_selected === 'free' || player.payment_status === 'free' || !player.package_selected) && (
                         <span className="px-2 py-1 rounded text-xs font-medium bg-[#8f33e6]/20 text-[#8f33e6] border border-[#8f33e6]/30 flex items-center gap-1">
                           <Sparkles className="w-3 h-3" />
