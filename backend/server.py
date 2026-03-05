@@ -352,7 +352,32 @@ def hash_password(password: str) -> str:
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    """Verify password against hash. Supports both bcrypt hashes and PLAIN: prefixed passwords."""
+    # Log the values for debugging (remove in production after fixing)
+    logger.info(f"🔐 verify_password called")
+    logger.info(f"   Input password length: {len(plain_password)}")
+    logger.info(f"   Stored hash starts with: {hashed_password[:30] if hashed_password else 'EMPTY'}...")
+    
+    if not hashed_password:
+        logger.warning("   ⚠️ Empty hashed_password provided")
+        return False
+    
+    # Handle PLAIN: prefixed passwords (for admin setup/debugging)
+    if hashed_password.startswith("PLAIN:"):
+        stored_plain = hashed_password[6:]  # Remove "PLAIN:" prefix
+        logger.info(f"   Using PLAIN comparison (stored plain length: {len(stored_plain)})")
+        result = plain_password == stored_plain
+        logger.info(f"   PLAIN comparison result: {result}")
+        return result
+    
+    # Normal bcrypt verification
+    try:
+        result = pwd_context.verify(plain_password, hashed_password)
+        logger.info(f"   Bcrypt verification result: {result}")
+        return result
+    except Exception as e:
+        logger.error(f"   ❌ Bcrypt verification error: {e}")
+        return False
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
@@ -507,6 +532,117 @@ async def health_check_detailed():
     }
 
 
+@api_router.get("/debug/auth-check")
+async def debug_auth_check(email: str = "admin@hoopwithher.com"):
+    """
+    Debug endpoint to check user data without password verification.
+    Use this to verify database connectivity and user field structure.
+    """
+    try:
+        logger.info(f"🔍 Debug auth check for: {email}")
+        
+        # Try to find user
+        user = await mongo_db.staff_users.find_one({"email": email})
+        
+        if not user:
+            return {
+                "found": False,
+                "message": f"No user found with email: {email}",
+                "suggestion": "Check if user exists in Supabase dashboard"
+            }
+        
+        # Return user data (with password hash masked for security)
+        safe_user = {k: v for k, v in user.items()}
+        if "password_hash" in safe_user:
+            ph = safe_user["password_hash"]
+            if ph.startswith("PLAIN:"):
+                safe_user["password_hash"] = f"PLAIN:****{ph[-4:]}"
+            else:
+                safe_user["password_hash"] = f"bcrypt:{ph[:20]}..."
+        
+        # Also try to get all users to verify table access
+        all_users = await mongo_db.staff_users.find({})
+        user_count = len(all_users) if isinstance(all_users, list) else "unknown"
+        
+        return {
+            "found": True,
+            "user": safe_user,
+            "total_staff_users": user_count,
+            "database_type": "supabase" if USE_SUPABASE else "mongodb",
+            "environment": {
+                "supabase_url_configured": bool(os.environ.get('SUPABASE_URL')),
+                "supabase_key_configured": bool(os.environ.get('SUPABASE_ANON_KEY')),
+                "database_url_configured": bool(DATABASE_URL and 'YOUR_PASSWORD' not in DATABASE_URL)
+            }
+        }
+    except Exception as e:
+        logger.error(f"Debug auth check error: {e}")
+        logger.exception(e)
+        return {
+            "error": str(e),
+            "type": type(e).__name__,
+            "message": "Failed to query database"
+        }
+
+
+@api_router.get("/debug/login-test")
+async def debug_login_test(email: str = "admin@hoopwithher.com", password: str = "AdminPass123!"):
+    """
+    Debug endpoint to test full login flow with detailed diagnostics.
+    WARNING: Only use in development/debugging!
+    """
+    logger.info(f"🔍 Debug login test for: {email}")
+    
+    try:
+        # Step 1: Find user
+        user = await mongo_db.staff_users.find_one({"email": email})
+        if not user:
+            return {"step": "find_user", "success": False, "error": "User not found"}
+        
+        # Step 2: Check password field exists
+        password_hash = user.get("password_hash")
+        if not password_hash:
+            return {
+                "step": "check_password_field",
+                "success": False,
+                "user_keys": list(user.keys()),
+                "error": "password_hash field is missing or empty"
+            }
+        
+        # Step 3: Check password format
+        is_plain = password_hash.startswith("PLAIN:")
+        is_bcrypt = password_hash.startswith(("$2a$", "$2b$", "$2y$"))
+        
+        # Step 4: Attempt verification
+        try:
+            password_valid = verify_password(password, password_hash)
+        except Exception as verify_err:
+            return {
+                "step": "verify_password",
+                "success": False,
+                "password_format": "plain" if is_plain else ("bcrypt" if is_bcrypt else "unknown"),
+                "hash_prefix": password_hash[:10],
+                "error": str(verify_err)
+            }
+        
+        return {
+            "step": "complete",
+            "success": password_valid,
+            "password_format": "plain" if is_plain else ("bcrypt" if is_bcrypt else "unknown"),
+            "hash_prefix": password_hash[:10] if password_hash else None,
+            "user_found": True,
+            "user_id": user.get("id"),
+            "user_email": user.get("email"),
+            "user_role": user.get("role"),
+            "is_active": user.get("is_active", True),
+            "input_password_length": len(password)
+        }
+    except Exception as e:
+        logger.error(f"Debug login test error: {e}")
+        logger.exception(e)
+        return {"step": "unexpected", "success": False, "error": str(e)}
+
+
 @api_router.post("/auth/setup")
 async def setup_admin():
     """Create initial admin user if no users exist. Only works when database is empty."""
@@ -548,30 +684,64 @@ async def setup_admin():
 
 @api_router.post("/auth/login")
 async def login(request: LoginRequest):
-    user = await mongo_db.staff_users.find_one({"email": request.email}, {"_id": 0})
+    logger.info(f"🔍 Login attempt for email: {request.email}")
     
-    if not user or not verify_password(request.password, user.get("password_hash", "")):
-        raise HTTPException(status_code=401, detail="Invalid email or password")
-    
-    if not user.get("is_active", True):
-        raise HTTPException(status_code=401, detail="Account is disabled")
-    
-    token = create_access_token({
-        "sub": user["id"],
-        "email": user["email"],
-        "role": user.get("role", "viewer"),
-        "name": user.get("name", "")
-    })
-    
-    return {
-        "token": token,
-        "user": {
-            "id": user["id"],
+    try:
+        # Note: Supabase wrapper doesn't support projection, so we get all fields
+        user = await mongo_db.staff_users.find_one({"email": request.email})
+        
+        if not user:
+            logger.warning(f"   ❌ User not found: {request.email}")
+            raise HTTPException(status_code=401, detail="Invalid email or password")
+        
+        logger.info(f"   ✅ User found: {user.get('email')}, ID: {user.get('id')}")
+        logger.info(f"   User keys: {list(user.keys())}")
+        
+        # Check if password_hash exists
+        password_hash = user.get("password_hash")
+        if not password_hash:
+            logger.error(f"   ❌ User has no password_hash field!")
+            raise HTTPException(status_code=401, detail="Invalid email or password")
+        
+        logger.info(f"   Password hash type: {password_hash[:10]}...")
+        
+        # Verify password
+        password_valid = verify_password(request.password, password_hash)
+        
+        if not password_valid:
+            logger.warning(f"   ❌ Password verification failed for: {request.email}")
+            raise HTTPException(status_code=401, detail="Invalid email or password")
+        
+        logger.info(f"   ✅ Password verified for: {request.email}")
+        
+        if not user.get("is_active", True):
+            logger.warning(f"   ❌ Account disabled: {request.email}")
+            raise HTTPException(status_code=401, detail="Account is disabled")
+        
+        token = create_access_token({
+            "sub": user["id"],
             "email": user["email"],
-            "name": user.get("name"),
-            "role": user.get("role", "viewer")
+            "role": user.get("role", "viewer"),
+            "name": user.get("name", "")
+        })
+        
+        logger.info(f"   ✅ Login successful for: {request.email}")
+        
+        return {
+            "token": token,
+            "user": {
+                "id": user["id"],
+                "email": user["email"],
+                "name": user.get("name"),
+                "role": user.get("role", "viewer")
+            }
         }
-    }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"   ❌ Unexpected login error: {e}")
+        logger.exception(e)
+        raise HTTPException(status_code=500, detail=f"Login error: {str(e)}")
 
 
 @api_router.post("/auth/register")

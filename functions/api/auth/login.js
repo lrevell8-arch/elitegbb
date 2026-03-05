@@ -97,6 +97,8 @@ export async function onRequestPost(context) {
     const body = await request.json();
     const { email, password } = body;
 
+    console.log('Login attempt for email:', email);
+
     if (!email || !password) {
       return new Response(
         JSON.stringify({ detail: 'Email and password required' }),
@@ -105,6 +107,7 @@ export async function onRequestPost(context) {
     }
 
     if (!env.SUPABASE_URL || !env.SUPABASE_ANON_KEY) {
+      console.error('Missing Supabase credentials');
       return new Response(
         JSON.stringify({ detail: 'Server configuration error - missing Supabase credentials' }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
@@ -112,32 +115,46 @@ export async function onRequestPost(context) {
     }
 
     // Look up user by email using Supabase REST API
+    console.log('Querying Supabase for user:', email.toLowerCase());
     const { data: user, error } = await supabaseQuery(env, 'staff_users', 'GET', {
       select: '*',
       eq: { email: email.toLowerCase() }
     });
 
-    if (error || !user) {
+    if (error) {
+      console.error('Supabase query error:', error);
       return new Response(
         JSON.stringify({ detail: 'Invalid email or password' }),
         { status: 401, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
+    if (!user) {
+      console.log('User not found:', email);
+      return new Response(
+        JSON.stringify({ detail: 'Invalid email or password' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('User found:', user.email, 'ID:', user.id);
+    console.log('Password hash field exists:', !!user.password_hash);
+    console.log('Password hash starts with:', user.password_hash ? user.password_hash.substring(0, 10) : 'N/A');
+
     // Check if account is active
     if (!user.is_active) {
+      console.log('Account is disabled for user:', email);
       return new Response(
         JSON.stringify({ detail: 'Account is disabled' }),
         { status: 401, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
-    // Verify password - Supabase Auth uses bcrypt, we'll do basic comparison
-    // For proper bcrypt, we'd need the bcrypt library, but we can use a simple hash check
-    // In production, passwords are stored as bcrypt hashes in Supabase
-    // This is a simplified check - actual implementation should use proper bcrypt
-    const isValid = await 184
-      (password, user.password_hash || user.password);
+    // Verify password
+    const passwordHash = user.password_hash || user.password;
+    console.log('Verifying password for user:', email);
+    const isValid = await verifyPassword(password, passwordHash);
+    console.log('Password verification result:', isValid);
 
     if (!isValid) {
       return new Response(
@@ -145,6 +162,8 @@ export async function onRequestPost(context) {
         { status: 401, headers: { 'Content-Type': 'application/json' } }
       );
     }
+
+    console.log('Login successful for user:', email);
 
     // Generate JWT token
     const token = await generateJWT({
@@ -181,25 +200,33 @@ export async function onRequestPost(context) {
   }
 }
 
-// Simplified password verification
+// Simplified password verification with PLAIN prefix support
 async function verifyPassword(password, storedHash) {
-  if (!storedHash) return false;
+  if (!storedHash) {
+    console.log('No stored hash provided');
+    return false;
+  }
 
-  // If using bcrypt (starts with $2), we can't verify without bcrypt library
-    
-  // Handle plain text passwords (TESTING ONLY)
+  console.log('Verifying password, hash starts with:', storedHash.substring(0, 10));
+
+  // Handle PLAIN: prefixed passwords (for admin setup/debugging)
   if (storedHash.startsWith('PLAIN:')) {
-    return password === storedHash.substring(6);
+    const plainPassword = storedHash.substring(6); // Remove "PLAIN:" prefix
+    console.log('Using PLAIN comparison, stored password length:', plainPassword.length);
+    const result = password === plainPassword;
+    console.log('PLAIN comparison result:', result);
+    return result;
   }
-  // For demo purposes, assume passwords were stored with simple SHA-256
-  // TEMPORARY: Direct password comparison for testing
-  // TODO: Implement proper bcrypt or update all passwords to SHA-256
+
+  // If using bcrypt (starts with $2), we can't verify without bcrypt library in Cloudflare Workers
   if (storedHash.startsWith('$2')) {
-    // For bcrypt hashes, temporarily do simple comparison
-    // This is INSECURE - only for testing!
-    return password === 'AdminPass123!' && storedHash.startsWith('$2b$');
+    console.error('Bcrypt password detected but bcrypt library not available in Cloudflare Workers');
+    console.error('Please use PLAIN: prefix for passwords (e.g., PLAIN:YourPassword123)');
+    return false;
   }
-  // SHA-256 comparison
+
+  // SHA-256 comparison (legacy format)
+  console.log('Using SHA-256 comparison');
   const salt = storedHash.substring(0, 16);
   const hash = await hashPassword(password, salt);
   return timingSafeEqual(hash, storedHash.substring(16));
