@@ -10,11 +10,14 @@
 
 ### Code & Features
 - [x] **Frontend:** Complete React application with 20+ pages
-- [x] **API Endpoints:** 23 Cloudflare Pages Functions implemented
+- [x] **API Endpoints:** 27 Cloudflare Pages Functions implemented
 - [x] **Database:** Supabase schema aligned with API
 - [x] **Admin Panel:** Player/coach verification, dashboard, pipeline board
 - [x] **Player Features:** Registration portal, profile management
 - [x] **Coach Features:** Dashboard, player comparison, subscription flow
+- [x] **PDF Deliverables:** One-Pager, Tracking Profile, Film Index generation
+- [x] **Verified Prospect Badge:** SVG/PNG badge generation with HWH branding
+- [x] **Bulk Import:** CSV/XLSX import for coaches and players (admin only)
 - [x] **Test Suite:** Comprehensive testing framework (Python + Shell)
 
 ### Recent Fixes (Just Completed)
@@ -150,6 +153,9 @@ python3 tests/run_all_tests.py --quick
 - [ ] Set up monitoring/logging
 
 ### Month 1: Features
+- [ ] PDF to actual file conversion (WeasyPrint/DocRaptor integration)
+- [ ] Verified Badge PNG rendering server-side
+- [ ] Email integration for welcome/password delivery
 - [ ] Video upload functionality
 - [ ] Messaging system completion
 - [ ] Player evaluation tools
@@ -162,12 +168,52 @@ python3 tests/run_all_tests.py --quick
 ### Documentation
 - Start with: `HANDOFF.md` (comprehensive guide)
 - Deployment: `DEPLOY.md` (quick deploy steps)
+- New Features: `DELIVERABLES_AND_IMPORT_API.md` (PDF/Badge/Import API)
 - Testing: `tests/README.md` (test procedures)
 
 ### Troubleshooting
 - Check: `SUPABASE_API_KEY_FIX.md` (common issues)
 - Secrets: `WRANGLER_SECRETS_SETUP.md` (auth setup)
 - General: `CLOUDFARE_SETUP_GUIDE.md` (platform config)
+
+---
+
+## 🎨 NEW: PDF/Badge Deliverables & Bulk Import (Just Added)
+
+### Quick Test Examples
+
+```bash
+# 1. Generate Player One-Pager (HTML, print to PDF)
+curl -H "Authorization: Bearer <admin_token>" \
+  https://elitegbb-app.pages.dev/api/admin/deliverables/pdf/one-pager/<player_id>
+
+# 2. Generate Verified Prospect Badge (SVG)
+curl -H "Authorization: Bearer <admin_token>" \
+  https://elitegbb-app.pages.dev/api/admin/deliverables/badge/<player_id>
+
+# 3. Download Coaches Import Template
+curl -H "Authorization: Bearer <admin_token>" \
+  https://elitegbb-app.pages.dev/api/admin/import/coaches?format=csv
+
+# 4. Bulk Import Coaches
+curl -X POST -H "Authorization: Bearer <admin_token>" \
+  -F "file=@coaches.csv" \
+  https://elitegbb-app.pages.dev/api/admin/import/coaches
+
+# 5. Bulk Import Players
+curl -X POST -H "Authorization: Bearer <admin_token>" \
+  -F "file=@players.csv" \
+  https://elitegbb-app.pages.dev/api/admin/import/players
+```
+
+### Features
+- **PDF Deliverables:** Player One-Pager, Tracking Profile, Film Index (HWH branded)
+- **Verified Prospect Badge:** SVG/PNG badges with star burst design, basketball icon, player info
+- **Bulk Import Coaches:** CSV/XLSX with fields: name, email, school, title, state, auto_verify
+- **Bulk Import Players:** CSV/XLSX with full player profile fields, auto-generates player keys and temp passwords
+- **Admin Only:** All endpoints require admin JWT token
+
+**Full API Docs:** See `DELIVERABLES_AND_IMPORT_API.md`
 
 ---
 
