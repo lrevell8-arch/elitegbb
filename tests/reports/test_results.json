@@ -1,0 +1,484 @@
+{
+  "test_run": {
+    "timestamp": "2026-03-05T12:53:51.092906",
+    "host": "http://localhost:8790",
+    "duration_seconds": 1.26,
+    "total_tests": 14,
+    "passed": 13,
+    "failed": 1,
+    "success_rate": 92.9
+  },
+  "schema_info": {
+    "required_fields": [
+      "player_name",
+      "dob",
+      "grad_class",
+      "gender",
+      "school",
+      "city",
+      "state",
+      "primary_position",
+      "parent_name",
+      "parent_email"
+    ],
+    "optional_fields": [
+      "preferred_name",
+      "instagram_handle",
+      "secondary_position",
+      "jersey_number",
+      "height",
+      "weight",
+      "parent_phone",
+      "player_email"
+    ],
+    "all_fields": [
+      "id",
+      "player_key",
+      "player_name",
+      "preferred_name",
+      "instagram_handle",
+      "dob",
+      "grad_class",
+      "gender",
+      "school",
+      "city",
+      "state",
+      "primary_position",
+      "secondary_position",
+      "jersey_number",
+      "height",
+      "weight",
+      "parent_name",
+      "parent_email",
+      "parent_phone",
+      "player_email",
+      "created_at",
+      "updated_at"
+    ]
+  },
+  "results": [
+    {
+      "test_name": "Health Check",
+      "success": false,
+      "timestamp": "2026-03-05T12:53:49.849131",
+      "response_time_ms": 13.9,
+      "status_code": null,
+      "details": null,
+      "error": "Expecting value: line 1 column 1 (char 0)",
+      "data": null
+    },
+    {
+      "test_name": "GET All Players",
+      "success": true,
+      "timestamp": "2026-03-05T12:53:49.930376",
+      "response_time_ms": 80.55,
+      "status_code": 200,
+      "details": "Retrieved 20 players",
+      "error": null,
+      "data": {
+        "count": 20
+      }
+    },
+    {
+      "test_name": "Create Player (free)",
+      "success": true,
+      "timestamp": "2026-03-05T12:53:50.019553",
+      "response_time_ms": 88.55,
+      "status_code": 201,
+      "details": "Created player: P-RWNNXE",
+      "error": null,
+      "data": {
+        "success": true,
+        "player": {
+          "id": "4114736a-3b09-485c-a3e9-db4053be4de8",
+          "player_key": "P-RWNNXE",
+          "player_name": "Test Player BFZ",
+          "grad_class": "2025",
+          "gender": "Female",
+          "primary_position": "SF",
+          "school": "East High",
+          "city": "Houston",
+          "state": "PA",
+          "parent_email": "test_1772715229_irnqj@elitegbb.com",
+          "created_at": "2026-03-05T12:53:49.991258+00:00"
+        },
+        "player_key": "P-RWNNXE",
+        "message": "Free profile created successfully! Upgrade anytime.",
+        "payment_required": false,
+        "package_price": 0,
+        "is_free_tier": true,
+        "temp_password": "TempPass123!"
+      }
+    },
+    {
+      "test_name": "GET Player by ID",
+      "success": true,
+      "timestamp": "2026-03-05T12:53:50.037962",
+      "response_time_ms": 18.08,
+      "status_code": 200,
+      "details": "Retrieved player 4114736a-3b09-485c-a3e9-db4053be4de8",
+      "error": null,
+      "data": null
+    },
+    {
+      "test_name": "Create Player (standard)",
+      "success": true,
+      "timestamp": "2026-03-05T12:53:50.096279",
+      "response_time_ms": 57.81,
+      "status_code": 201,
+      "details": "Created player: P-QRTI7Z",
+      "error": null,
+      "data": {
+        "success": true,
+        "player": {
+          "id": "efbd1555-9e98-4ae7-84a3-3b1db8daa083",
+          "player_key": "P-QRTI7Z",
+          "player_name": "Test Player VMQ",
+          "grad_class": "2028",
+          "gender": "Male",
+          "primary_position": "F",
+          "school": "Central School",
+          "city": "Philadelphia",
+          "state": "NY",
+          "parent_email": "test_1772715230_gwhly@elitegbb.com",
+          "created_at": "2026-03-05T12:53:50.071858+00:00"
+        },
+        "player_key": "P-QRTI7Z",
+        "message": "Player created successfully",
+        "payment_required": false,
+        "package_price": 0,
+        "is_free_tier": false,
+        "temp_password": "TempPass123!"
+      }
+    },
+    {
+      "test_name": "Create Player (premium)",
+      "success": true,
+      "timestamp": "2026-03-05T12:53:50.172022",
+      "response_time_ms": 75.2,
+      "status_code": 201,
+      "details": "Created player: P-3ZKRDJ",
+      "error": null,
+      "data": {
+        "success": true,
+        "player": {
+          "id": "bdf85863-9c48-4c5a-84e3-fdd67492d4c1",
+          "player_key": "P-3ZKRDJ",
+          "player_name": "Test Player NOA",
+          "grad_class": "2026",
+          "gender": "Male",
+          "primary_position": "C",
+          "school": "Metro Prep",
+          "city": "Houston",
+          "state": "CA",
+          "parent_email": "test_1772715230_dxchb@elitegbb.com",
+          "created_at": "2026-03-05T12:53:50.136563+00:00"
+        },
+        "player_key": "P-3ZKRDJ",
+        "message": "Player created successfully",
+        "payment_required": false,
+        "package_price": 0,
+        "is_free_tier": false,
+        "temp_password": "TempPass123!"
+      }
+    },
+    {
+      "test_name": "Schema Validation (Missing Fields)",
+      "success": true,
+      "timestamp": "2026-03-05T12:53:50.184500",
+      "response_time_ms": 12.15,
+      "status_code": 400,
+      "details": "Correctly rejected incomplete data",
+      "error": null,
+      "data": null
+    },
+    {
+      "test_name": "Create Player (premium)",
+      "success": true,
+      "timestamp": "2026-03-05T12:53:50.254305",
+      "response_time_ms": 69.27,
+      "status_code": 201,
+      "details": "Created player: P-GXNWNJ",
+      "error": null,
+      "data": {
+        "success": true,
+        "player": {
+          "id": "8ca5b9be-9e58-44c5-9fa3-cb6615358159",
+          "player_key": "P-GXNWNJ",
+          "player_name": "Test Player XGK",
+          "grad_class": "2025",
+          "gender": "Male",
+          "primary_position": "FC",
+          "school": "County Academy",
+          "city": "Charlotte",
+          "state": "TX",
+          "parent_email": "test_1772715230_pkyqv@elitegbb.com",
+          "created_at": "2026-03-05T12:53:50.217293+00:00"
+        },
+        "player_key": "P-GXNWNJ",
+        "message": "Player created successfully",
+        "payment_required": false,
+        "package_price": 0,
+        "is_free_tier": false,
+        "temp_password": "TempPass123!"
+      }
+    },
+    {
+      "test_name": "Create Player (standard)",
+      "success": true,
+      "timestamp": "2026-03-05T12:53:50.439359",
+      "response_time_ms": 84.37,
+      "status_code": 201,
+      "details": "Created player: P-UCXB00",
+      "error": null,
+      "data": {
+        "success": true,
+        "player": {
+          "id": "e345948f-46cc-4b0b-a325-dbc945b3409c",
+          "player_key": "P-UCXB00",
+          "player_name": "Test Player GNS",
+          "grad_class": "2028",
+          "gender": "Female",
+          "primary_position": "C",
+          "school": "East High",
+          "city": "Los Angeles",
+          "state": "NC",
+          "parent_email": "test_1772715230_frual@elitegbb.com",
+          "created_at": "2026-03-05T12:53:50.397757+00:00"
+        },
+        "player_key": "P-UCXB00",
+        "message": "Player created successfully",
+        "payment_required": false,
+        "package_price": 0,
+        "is_free_tier": false,
+        "temp_password": "TempPass123!"
+      }
+    },
+    {
+      "test_name": "Create Player (standard)",
+      "success": true,
+      "timestamp": "2026-03-05T12:53:50.607725",
+      "response_time_ms": 67.71,
+      "status_code": 201,
+      "details": "Created player: P-C38D0C",
+      "error": null,
+      "data": {
+        "success": true,
+        "player": {
+          "id": "c8cfe813-45f6-4ef4-8220-ae66ad1b3aea",
+          "player_key": "P-C38D0C",
+          "player_name": "Test Player XXY",
+          "grad_class": "2025",
+          "gender": "Female",
+          "primary_position": "F",
+          "school": "Central School",
+          "city": "Los Angeles",
+          "state": "OH",
+          "parent_email": "test_1772715230_fiqzb@elitegbb.com",
+          "created_at": "2026-03-05T12:53:50.581446+00:00"
+        },
+        "player_key": "P-C38D0C",
+        "message": "Player created successfully",
+        "payment_required": false,
+        "package_price": 0,
+        "is_free_tier": false,
+        "temp_password": "TempPass123!"
+      }
+    },
+    {
+      "test_name": "Create Player (premium)",
+      "success": true,
+      "timestamp": "2026-03-05T12:53:50.760975",
+      "response_time_ms": 52.47,
+      "status_code": 201,
+      "details": "Created player: P-EWPGAQ",
+      "error": null,
+      "data": {
+        "success": true,
+        "player": {
+          "id": "eb375bd6-a0a1-4111-bd43-fad02f04a041",
+          "player_key": "P-EWPGAQ",
+          "player_name": "Test Player JAT",
+          "grad_class": "2029",
+          "gender": "Male",
+          "primary_position": "FC",
+          "school": "Central School",
+          "city": "New York",
+          "state": "FL",
+          "parent_email": "test_1772715230_kytxr@elitegbb.com",
+          "created_at": "2026-03-05T12:53:50.740545+00:00"
+        },
+        "player_key": "P-EWPGAQ",
+        "message": "Player created successfully",
+        "payment_required": false,
+        "package_price": 0,
+        "is_free_tier": false,
+        "temp_password": "TempPass123!"
+      }
+    },
+    {
+      "test_name": "Create Player (free)",
+      "success": true,
+      "timestamp": "2026-03-05T12:53:50.925898",
+      "response_time_ms": 64.26,
+      "status_code": 201,
+      "details": "Created player: P-XZ05P1",
+      "error": null,
+      "data": {
+        "success": true,
+        "player": {
+          "id": "3f2bc5c6-b24a-4013-b4b7-e620b1734da1",
+          "player_key": "P-XZ05P1",
+          "player_name": "Test Player PWX",
+          "grad_class": "2028",
+          "gender": "Female",
+          "primary_position": "G",
+          "school": "Metro Prep",
+          "city": "Detroit",
+          "state": "PA",
+          "parent_email": "test_1772715230_eznnt@elitegbb.com",
+          "created_at": "2026-03-05T12:53:50.899113+00:00"
+        },
+        "player_key": "P-XZ05P1",
+        "message": "Free profile created successfully! Upgrade anytime.",
+        "payment_required": false,
+        "package_price": 0,
+        "is_free_tier": true,
+        "temp_password": "TempPass123!"
+      }
+    },
+    {
+      "test_name": "Bulk Create (5 players)",
+      "success": true,
+      "timestamp": "2026-03-05T12:53:51.026402",
+      "response_time_ms": 841.54,
+      "status_code": "All 5 players created successfully (168ms avg)",
+      "details": null,
+      "error": null,
+      "data": {
+        "created": 5,
+        "failed": 0,
+        "success_rate": 100.0
+      }
+    },
+    {
+      "test_name": "GET All Players",
+      "success": true,
+      "timestamp": "2026-03-05T12:53:51.092602",
+      "response_time_ms": 65.51,
+      "status_code": 200,
+      "details": "Retrieved 28 players",
+      "error": null,
+      "data": {
+        "count": 28
+      }
+    }
+  ],
+  "created_players": [
+    {
+      "id": "4114736a-3b09-485c-a3e9-db4053be4de8",
+      "player_key": "P-RWNNXE",
+      "player_name": "Test Player BFZ",
+      "grad_class": "2025",
+      "gender": "Female",
+      "primary_position": "SF",
+      "school": "East High",
+      "city": "Houston",
+      "state": "PA",
+      "parent_email": "test_1772715229_irnqj@elitegbb.com",
+      "created_at": "2026-03-05T12:53:49.991258+00:00"
+    },
+    {
+      "id": "efbd1555-9e98-4ae7-84a3-3b1db8daa083",
+      "player_key": "P-QRTI7Z",
+      "player_name": "Test Player VMQ",
+      "grad_class": "2028",
+      "gender": "Male",
+      "primary_position": "F",
+      "school": "Central School",
+      "city": "Philadelphia",
+      "state": "NY",
+      "parent_email": "test_1772715230_gwhly@elitegbb.com",
+      "created_at": "2026-03-05T12:53:50.071858+00:00"
+    },
+    {
+      "id": "bdf85863-9c48-4c5a-84e3-fdd67492d4c1",
+      "player_key": "P-3ZKRDJ",
+      "player_name": "Test Player NOA",
+      "grad_class": "2026",
+      "gender": "Male",
+      "primary_position": "C",
+      "school": "Metro Prep",
+      "city": "Houston",
+      "state": "CA",
+      "parent_email": "test_1772715230_dxchb@elitegbb.com",
+      "created_at": "2026-03-05T12:53:50.136563+00:00"
+    },
+    {
+      "id": "8ca5b9be-9e58-44c5-9fa3-cb6615358159",
+      "player_key": "P-GXNWNJ",
+      "player_name": "Test Player XGK",
+      "grad_class": "2025",
+      "gender": "Male",
+      "primary_position": "FC",
+      "school": "County Academy",
+      "city": "Charlotte",
+      "state": "TX",
+      "parent_email": "test_1772715230_pkyqv@elitegbb.com",
+      "created_at": "2026-03-05T12:53:50.217293+00:00"
+    },
+    {
+      "id": "e345948f-46cc-4b0b-a325-dbc945b3409c",
+      "player_key": "P-UCXB00",
+      "player_name": "Test Player GNS",
+      "grad_class": "2028",
+      "gender": "Female",
+      "primary_position": "C",
+      "school": "East High",
+      "city": "Los Angeles",
+      "state": "NC",
+      "parent_email": "test_1772715230_frual@elitegbb.com",
+      "created_at": "2026-03-05T12:53:50.397757+00:00"
+    },
+    {
+      "id": "c8cfe813-45f6-4ef4-8220-ae66ad1b3aea",
+      "player_key": "P-C38D0C",
+      "player_name": "Test Player XXY",
+      "grad_class": "2025",
+      "gender": "Female",
+      "primary_position": "F",
+      "school": "Central School",
+      "city": "Los Angeles",
+      "state": "OH",
+      "parent_email": "test_1772715230_fiqzb@elitegbb.com",
+      "created_at": "2026-03-05T12:53:50.581446+00:00"
+    },
+    {
+      "id": "eb375bd6-a0a1-4111-bd43-fad02f04a041",
+      "player_key": "P-EWPGAQ",
+      "player_name": "Test Player JAT",
+      "grad_class": "2029",
+      "gender": "Male",
+      "primary_position": "FC",
+      "school": "Central School",
+      "city": "New York",
+      "state": "FL",
+      "parent_email": "test_1772715230_kytxr@elitegbb.com",
+      "created_at": "2026-03-05T12:53:50.740545+00:00"
+    },
+    {
+      "id": "3f2bc5c6-b24a-4013-b4b7-e620b1734da1",
+      "player_key": "P-XZ05P1",
+      "player_name": "Test Player PWX",
+      "grad_class": "2028",
+      "gender": "Female",
+      "primary_position": "G",
+      "school": "Metro Prep",
+      "city": "Detroit",
+      "state": "PA",
+      "parent_email": "test_1772715230_eznnt@elitegbb.com",
+      "created_at": "2026-03-05T12:53:50.899113+00:00"
+    }
+  ],
+  "summary": "13 passed, 1 failed out of 14 tests"
+}

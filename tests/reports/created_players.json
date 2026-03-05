@@ -1,0 +1,147 @@
+{
+  "metadata": {
+    "created_at": "2026-03-05T12:53:40.005661",
+    "api_host": "http://localhost:8790",
+    "count": 10,
+    "stats": {
+      "total": 10,
+      "success": 10,
+      "failed": 0,
+      "start_time": 1772715218.1990135,
+      "end_time": 1772715220.0055482
+    }
+  },
+  "players": [
+    {
+      "id": "bc45b68f-d14d-4176-9463-37c6f8bc64e5",
+      "player_key": "P-DKREGA",
+      "player_name": "Emma Flores",
+      "grad_class": "2028",
+      "gender": "Female",
+      "primary_position": "F",
+      "school": "Greater Atlanta Christian",
+      "city": "Johns Creek",
+      "state": "GA",
+      "parent_email": "parent.flores48@example.com",
+      "created_at": "2026-03-05T12:53:38.298374+00:00"
+    },
+    {
+      "id": "6f6b0ac9-ddcf-46f5-b27c-e9c6bd7ae630",
+      "player_key": "P-9J9E9O",
+      "player_name": "Victoria Moore",
+      "grad_class": "2027",
+      "gender": "Female",
+      "primary_position": "F",
+      "school": "Brookwood Academy",
+      "city": "Duluth",
+      "state": "GA",
+      "parent_email": "parent.moore705@example.com",
+      "created_at": "2026-03-05T12:53:38.494198+00:00"
+    },
+    {
+      "id": "a26f01e1-b438-47ad-a194-ab10f50f2b49",
+      "player_key": "P-I0BK0U",
+      "player_name": "Noah Wilson",
+      "grad_class": "2029",
+      "gender": "Female",
+      "primary_position": "F",
+      "school": "North Atlanta Academy",
+      "city": "Snellville",
+      "state": "GA",
+      "parent_email": "parent.wilson995@example.com",
+      "created_at": "2026-03-05T12:53:38.693391+00:00"
+    },
+    {
+      "id": "efdf1954-b717-4edc-be4c-ca5b75c4b857",
+      "player_key": "P-QM6UJ8",
+      "player_name": "Amelia Anderson",
+      "grad_class": "2027",
+      "gender": "Female",
+      "primary_position": "G",
+      "school": "Duluth High School",
+      "city": "Grayson",
+      "state": "GA",
+      "parent_email": "parent.anderson838@example.com",
+      "created_at": "2026-03-05T12:53:38.860102+00:00"
+    },
+    {
+      "id": "10b68b23-ae7d-4be2-9b3a-935aa1ddb093",
+      "player_key": "P-44QTIH",
+      "player_name": "Benjamin Miller",
+      "grad_class": "2025",
+      "gender": "Female",
+      "primary_position": "PF",
+      "school": "Wesleyan School",
+      "city": "Dunwoody",
+      "state": "GA",
+      "parent_email": "parent.miller814@example.com",
+      "created_at": "2026-03-05T12:53:39.028509+00:00"
+    },
+    {
+      "id": "e2a2d863-8ee0-4ea0-b5d5-7c080ffadce1",
+      "player_key": "P-85VS2N",
+      "player_name": "Audrey Moore",
+      "grad_class": "2027",
+      "gender": "Female",
+      "primary_position": "G",
+      "school": "St. Pius X",
+      "city": "Little Five Points",
+      "state": "GA",
+      "parent_email": "parent.moore683@example.com",
+      "created_at": "2026-03-05T12:53:39.191021+00:00"
+    },
+    {
+      "id": "4759523e-95f8-48d3-b729-2be89f52a7c3",
+      "player_key": "P-CYJBN9",
+      "player_name": "Liam Thomas",
+      "grad_class": "2029",
+      "gender": "Female",
+      "primary_position": "PF",
+      "school": "Grayson High",
+      "city": "Candler Park",
+      "state": "GA",
+      "parent_email": "parent.thomas834@example.com",
+      "created_at": "2026-03-05T12:53:39.366837+00:00"
+    },
+    {
+      "id": "74c48dfb-7d0f-43c2-8b26-6689a1ded973",
+      "player_key": "P-VUPKVA",
+      "player_name": "Grace Anderson",
+      "grad_class": "2029",
+      "gender": "Male",
+      "primary_position": "F",
+      "school": "Central Gwinnett Academy",
+      "city": "Stone Mountain",
+      "state": "GA",
+      "parent_email": "parent.anderson363@example.com",
+      "created_at": "2026-03-05T12:53:39.538246+00:00"
+    },
+    {
+      "id": "95dc34f7-4ab6-4dba-b433-4bda49cb1d4d",
+      "player_key": "P-MXBCQU",
+      "player_name": "Benjamin Williams",
+      "grad_class": "2025",
+      "gender": "Female",
+      "primary_position": "SG",
+      "school": "Marist School",
+      "city": "Norcross",
+      "state": "GA",
+      "parent_email": "parent.williams419@example.com",
+      "created_at": "2026-03-05T12:53:39.703888+00:00"
+    },
+    {
+      "id": "712a15d3-473a-4562-9249-ee15c5eaaa18",
+      "player_key": "P-Q8B41Q",
+      "player_name": "Sebastian Lewis",
+      "grad_class": "2027",
+      "gender": "Female",
+      "primary_position": "G",
+      "school": "Milton High School",
+      "city": "Midtown",
+      "state": "GA",
+      "parent_email": "parent.lewis719@example.com",
+      "created_at": "2026-03-05T12:53:39.880563+00:00"
+    }
+  ],
+  "failed": []
+}
