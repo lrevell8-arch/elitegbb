@@ -226,7 +226,32 @@ export default function IntakeForm() {
       }
     } catch (error) {
       console.error('Submission error:', error);
-      toast.error(error.response?.data?.detail || 'Failed to submit form. Please try again.');
+      const errorData = error.response?.data;
+      let errorMessage = 'Failed to submit form. Please try again.';
+
+      if (errorData) {
+        if (errorData.detail) {
+          errorMessage = errorData.detail;
+        }
+        if (errorData.missingFields) {
+          errorMessage = `Missing required fields: ${errorData.missingFields.join(', ')}`;
+        }
+        if (errorData.code) {
+          errorMessage += ` (Error code: ${errorData.code})`;
+        }
+        if (errorData.help) {
+          console.log('Error help:', errorData.help);
+        }
+      }
+
+      if (error.message === 'Network Error') {
+        errorMessage = 'Cannot connect to server. Please check your internet connection or try again later.';
+      }
+
+      toast.error(errorMessage, {
+        duration: 5000,
+        description: errorData?.help || undefined
+      });
     } finally {
       setIsSubmitting(false);
     }

@@ -139,24 +139,83 @@ export async function onRequestPost(context) {
   const { request, env } = context;
 
   try {
-    const body = await request.json();
+    // Log environment status (without exposing secrets)
+    console.log('Player creation started');
+    console.log('SUPABASE_URL available:', !!env.SUPABASE_URL);
+    console.log('SUPABASE_ANON_KEY available:', !!env.SUPABASE_ANON_KEY);
+
+    if (!env.SUPABASE_URL || !env.SUPABASE_ANON_KEY) {
+      console.error('Missing required environment variables');
+      return new Response(
+        JSON.stringify({
+          detail: 'Server configuration error: Database connection not configured',
+          error: 'MISSING_ENV_VARS',
+          help: 'Please ensure SUPABASE_ANON_KEY is set via wrangler secret put SUPABASE_ANON_KEY'
+        }),
+        {
+          status: 500,
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+          }
+        }
+      );
+    }
+
+    let body;
+    try {
+      body = await request.json();
+      console.log('Request body received:', JSON.stringify(body, null, 2));
+    } catch (parseError) {
+      console.error('Failed to parse request body:', parseError);
+      return new Response(
+        JSON.stringify({ detail: 'Invalid JSON in request body', error: parseError.message }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+        }
+      );
+    }
 
     // Required fields (matching frontend form validation)
     const required = ['player_name', 'grad_class', 'gender', 'primary_position'];
+    const missingFields = [];
     for (const field of required) {
       if (!body[field]) {
-        return new Response(
-          JSON.stringify({ detail: `${field} is required` }),
-          { status: 400, headers: { 'Content-Type': 'application/json' } }
-        );
+        missingFields.push(field);
       }
+    }
+
+    if (missingFields.length > 0) {
+      console.log('Missing required fields:', missingFields);
+      return new Response(
+        JSON.stringify({
+          detail: `Missing required fields: ${missingFields.join(', ')}`,
+          missingFields: missingFields,
+          receivedData: Object.keys(body)
+        }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+        }
+      );
     }
 
     // Also require parent info
     if (!body.parent_name || !body.parent_email) {
+      console.log('Missing parent info');
       return new Response(
-        JSON.stringify({ detail: 'Parent name and email are required' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        JSON.stringify({
+          detail: 'Parent name and email are required',
+          missingParentInfo: {
+            parent_name: !body.parent_name ? 'missing' : 'provided',
+            parent_email: !body.parent_email ? 'missing' : 'provided'
+          }
+        }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+        }
       );
     }
 
@@ -185,18 +244,24 @@ export async function onRequestPost(context) {
       // Stats - map field names
       height: body.height || null,
       weight: body.weight ? parseInt(body.weight) : null,
-      
+
       // Positions - combine primary and secondary into array
-      positions: body.secondary_position 
+      positions: body.secondary_position
         ? [body.primary_position, body.secondary_position]
         : [body.primary_position],
-      
+
+      // Gender - required field
+      gender: body.gender || null,
+
       // Stats that exist in DB (note the naming)
       ppg: body.ppg ? parseFloat(body.ppg) : null,
       apg: body.apg ? parseFloat(body.apg) : null,
       rpg: body.rpg ? parseFloat(body.rpg) : null,
+      spg: body.spg ? parseFloat(body.spg) : null,
+      bpg: body.bpg ? parseFloat(body.bpg) : null,
       fg_percent: body.fg_pct ? parseFloat(body.fg_pct) : null,
       three_p_percent: body.three_pct ? parseFloat(body.three_pct) : null,
+      ft_percent: body.ft_pct ? parseFloat(body.ft_pct) : null,
       
       // Social links (if provided)
       instagram: body.instagram_handle || null,
@@ -249,17 +314,47 @@ export async function onRequestPost(context) {
       })
     };
 
+    console.log('Inserting player data into Supabase...');
+
     const { data, error } = await supabaseQuery(env, 'players', 'POST', {
       body: playerData
     });
 
     if (error) {
       console.error('Player creation error:', error);
+      // Check for specific Supabase errors
+      let errorDetail = 'Failed to create player';
+      let errorCode = 'DB_ERROR';
+
+      if (error.message.includes('23505')) {
+        errorDetail = 'A player with this email already exists';
+        errorCode = 'DUPLICATE_EMAIL';
+      } else if (error.message.includes('23502')) {
+        errorDetail = 'Required database field is missing';
+        errorCode = 'NOT_NULL_VIOLATION';
+      } else if (error.message.includes('42P01')) {
+        errorDetail = 'Database table not found. Please ensure the players table exists in Supabase';
+        errorCode = 'TABLE_NOT_FOUND';
+      } else if (error.message.includes('permission denied')) {
+        errorDetail = 'Database permission denied. Please check Supabase RLS policies';
+        errorCode = 'PERMISSION_DENIED';
+      }
+
       return new Response(
-        JSON.stringify({ detail: 'Failed to create player', error: error.message }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
+        JSON.stringify({
+          detail: errorDetail,
+          error: error.message,
+          code: errorCode,
+          help: 'Check your Supabase configuration and ensure the players table exists with proper permissions'
+        }),
+        {
+          status: 500,
+          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+        }
       );
     }
+
+    console.log('Player created successfully:', data[0]?.id || 'unknown id');
 
     // Get package price for Stripe integration
     const packagePrices = {
@@ -290,9 +385,18 @@ export async function onRequestPost(context) {
     );
   } catch (err) {
     console.error('Server error:', err);
+    console.error('Error stack:', err.stack);
     return new Response(
-      JSON.stringify({ detail: 'Error: ' + err.message }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      JSON.stringify({
+        detail: 'Internal server error: ' + err.message,
+        error: err.message,
+        stack: err.stack,
+        help: 'Please check server logs for more details'
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      }
     );
   }
 }
