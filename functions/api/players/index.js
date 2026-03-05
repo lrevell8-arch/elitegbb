@@ -158,12 +158,9 @@ export async function onRequestPost(context) {
       player_email: body.player_email || null,
       level: body.level || null,
       team_names: body.team_names || null,
-      ppg: body.ppg || null,
-      apg: body.apg || null,
-      rpg: body.rpg || null,
       package_selected: body.package_selected || null,
       payment_status: 'pending',
-      verified: false
+      is_active: true
     };
 
     const { data, error } = await supabaseQuery(env, 'players', 'POST', {
