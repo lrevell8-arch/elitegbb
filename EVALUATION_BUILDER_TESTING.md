@@ -20,12 +20,29 @@ export SUPABASE_ANON_KEY="your-anon-key"
 export BACKEND_URL="http://localhost:8787"  # or your deployed URL
 ```
 
-### 2. Load Test Data
+### 2. Run Schema Migration (First Time Only)
 
-Run the test data loader to create sample projects:
+The database needs additional columns for the evaluation builder. Run this migration in Supabase:
+
+1. Go to [Supabase SQL Editor](https://app.supabase.com/project/srrasrbsqajtssqlxoju/sql/new)
+2. Copy and paste the contents of `backend/schema_migration_for_evaluation_builder.sql`
+3. Click "Run"
+
+This adds missing columns to:
+- `players` table (stats, self-evaluation data, package info)
+- `projects` table (package_type, payment_status)
+- `intake_submissions` table (all evaluation fields)
+- `deliverables` table (proper type/status constraints)
+- Creates `reminders` table
+
+### 3. Load Test Data
+
+After the migration, run the test data loader:
 
 ```bash
 cd /home/user/webapp
+export SUPABASE_URL="https://srrasrbsqajtssqlxoju.supabase.co"
+export SUPABASE_ANON_KEY="your-anon-key"
 node scripts/load_test_projects.js
 ```
 
@@ -35,7 +52,7 @@ This will create:
 - 5 projects with various package types and statuses
 - Associated deliverables for each project
 
-### 3. Verify the API Endpoint
+### 4. Verify the API Endpoint
 
 The endpoint `/api/admin/projects/[id]` should now be available. Test it with:
 
@@ -109,6 +126,13 @@ After running the loader, you'll have these players:
 
 ## Troubleshooting
 
+### "Could not find column" Error
+
+If you see errors like `Could not find the 'apg' column of 'players'`:
+1. The schema migration hasn't been applied
+2. Go to Supabase SQL Editor and run: `backend/schema_migration_for_evaluation_builder.sql`
+3. The migration adds all missing columns for the evaluation builder
+
 ### Blank Page on Evaluation Packet
 
 If the evaluation packet shows a blank page:
@@ -116,6 +140,7 @@ If the evaluation packet shows a blank page:
 2. Verify the admin token is valid: `localStorage.getItem('hwh_token')`
 3. Test the API endpoint directly with curl
 4. Check that the project ID exists in the database
+5. Verify the schema migration has been applied
 
 ### Missing Player Data
 
@@ -123,6 +148,7 @@ If player data doesn't display:
 1. Verify the player record exists in Supabase
 2. Check that intake_submission exists for the player
 3. Ensure the API response includes the `player` and `intake_submission` fields
+4. Check that the schema migration has been applied
 
 ### Print Styles Not Applied
 
