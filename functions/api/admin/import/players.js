@@ -4,7 +4,7 @@
 // Fields: player_name, position, grad_class, school, city, state, gender, height, weight, parent_name, parent_email, parent_phone
 // Admin only access
 
-import { verifyJWT } from '../../utils/jwt.js';
+import { verifyJWT } from '../../../utils/jwt.js';
 
 // Verify admin token
 async function verifyAdminToken(request, env) {

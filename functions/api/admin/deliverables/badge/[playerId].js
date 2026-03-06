@@ -2,7 +2,7 @@
 // GET /api/admin/deliverables/badge/{playerId}
 // Generates PNG badge with HWH branding (#0134bd blue, #fb6c1d orange)
 
-import { verifyJWT } from '../../../utils/jwt.js';
+import { verifyJWT } from '../../../../utils/jwt.js';
 
 // HWH Brand Colors
 const COLORS = {

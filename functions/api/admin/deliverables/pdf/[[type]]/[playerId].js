@@ -3,7 +3,7 @@
 // Types: one-pager, tracking-profile, film-index
 // HWH Branding: #0134bd (blue), #fb6c1d (orange)
 
-import { verifyJWT } from '../../../../utils/jwt.js';
+import { verifyJWT } from '../../../../../utils/jwt.js';
 
 // HWH Brand Colors
 const COLORS = {

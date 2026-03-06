@@ -4,7 +4,7 @@
 // Fields: name, email, school, title, state, auto_verify (optional)
 // Admin only access
 
-import { verifyJWT } from '../../utils/jwt.js';
+import { verifyJWT } from '../../../utils/jwt.js';
 
 // HWH Brand reference (for email templates if needed)
 const COLORS = {
