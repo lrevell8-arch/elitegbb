@@ -1,6 +1,6 @@
-// Image Upload Endpoint for Profile Pictures
-// POST /api/upload/image - Upload player or coach profile image
-// Uses Base64 encoding for image storage in Supabase (R2 alternative for Cloudflare Functions)
+// Image Upload Endpoint
+// POST /api/upload/image
+// Uploads base64 images for players (profile pictures) and coaches (logos)
 
 import { verifyJWT } from '../../../utils/jwt.js';
 
@@ -21,6 +21,7 @@ async function supabaseQuery(env, table, method, params = {}) {
       queryParams.append(key, `eq.${value}`);
     });
   }
+  if (params.limit) queryParams.append('limit', params.limit);
 
   const fullUrl = queryParams.toString() ? `${url}?${queryParams.toString()}` : url;
 
@@ -39,8 +40,8 @@ async function supabaseQuery(env, table, method, params = {}) {
   return { data, error: null };
 }
 
-// Verify any authenticated token
-async function verifyAnyToken(request, env) {
+// Verify token and get user info
+async function verifyToken(request, env) {
   const authHeader = request.headers.get('Authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return { valid: false, error: 'Missing token' };
@@ -55,29 +56,33 @@ async function verifyAnyToken(request, env) {
   }
 }
 
-// Validate and process image
-function validateImage(base64String) {
-  // Check if it's a valid base64 image
-  const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-  const match = base64String.match(/^data:([a-zA-Z0-9\/]+);base64,(.+)$/);
-
-  if (!match) {
-    return { valid: false, error: 'Invalid image format. Expected base64 data URI.' };
+// Validate base64 image
+function validateBase64Image(base64String) {
+  // Check if it's a data URL
+  if (base64String.startsWith('data:image/')) {
+    const matches = base64String.match(/^data:image\/(png|jpeg|jpg|gif|webp);base64,(.+)$/);
+    if (!matches) {
+      return { valid: false, error: 'Invalid image format. Only PNG, JPEG, GIF, and WebP are allowed.' };
+    }
+    // Check size (base64 is roughly 4/3 of actual size, so 2MB = ~2.67MB base64)
+    const base64Data = matches[2];
+    const sizeInBytes = (base64Data.length * 3) / 4;
+    if (sizeInBytes > 2 * 1024 * 1024) {
+      return { valid: false, error: 'Image too large. Maximum size is 2MB.' };
+    }
+    return { valid: true, format: matches[1], data: base64Data };
   }
-
-  const mimeType = match[1];
-  const base64Data = match[2];
-
-  if (!validTypes.includes(mimeType)) {
-    return { valid: false, error: `Invalid image type. Allowed: ${validTypes.join(', ')}` };
+  
+  // If it's just base64 without data URL prefix
+  if (base64String.length > 100) {
+    const sizeInBytes = (base64String.length * 3) / 4;
+    if (sizeInBytes > 2 * 1024 * 1024) {
+      return { valid: false, error: 'Image too large. Maximum size is 2MB.' };
+    }
+    return { valid: true, format: 'unknown', data: base64String };
   }
-
-  // Check size (max 2MB = ~2.7M base64 chars)
-  if (base64Data.length > 2700000) {
-    return { valid: false, error: 'Image too large. Maximum size is 2MB.' };
-  }
-
-  return { valid: true, mimeType, base64Data };
+  
+  return { valid: false, error: 'Invalid image data' };
 }
 
 // POST - Upload image
@@ -85,7 +90,7 @@ export async function onRequestPost(context) {
   const { request, env } = context;
 
   try {
-    const auth = await verifyAnyToken(request, env);
+    const auth = await verifyToken(request, env);
     if (!auth.valid) {
       return new Response(
         JSON.stringify({ detail: auth.error }),
@@ -94,17 +99,24 @@ export async function onRequestPost(context) {
     }
 
     const body = await request.json();
-    const { image, type, entity_id } = body;
+    const { image, type } = body;
 
-    if (!image || !type) {
+    if (!image) {
       return new Response(
-        JSON.stringify({ detail: 'Image and type are required' }),
+        JSON.stringify({ detail: 'Image is required' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (!type || !['player', 'coach'].includes(type)) {
+      return new Response(
+        JSON.stringify({ detail: 'Type must be "player" or "coach"' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
     // Validate image
-    const validation = validateImage(image);
+    const validation = validateBase64Image(image);
     if (!validation.valid) {
       return new Response(
         JSON.stringify({ detail: validation.error }),
@@ -112,81 +124,58 @@ export async function onRequestPost(context) {
       );
     }
 
-    // Determine entity type and update accordingly
-    let table, idField, entityId;
-
+    // Determine user ID and table based on type
+    let userId, table, field, role;
     if (type === 'player') {
+      userId = auth.user.user_id || auth.user.id;
       table = 'players';
-      idField = 'id';
-      entityId = entity_id || auth.user.user_id;
-
-      // Verify ownership
-      if (auth.user.role !== 'player' && auth.user.role !== 'admin' && auth.user.role !== 'editor') {
-        return new Response(
-          JSON.stringify({ detail: 'Insufficient permissions' }),
-          { status: 403, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
-
-      // If player, verify they're updating their own profile
-      if (auth.user.role === 'player' && entityId !== auth.user.user_id) {
-        return new Response(
-          JSON.stringify({ detail: 'Can only update own profile' }),
-          { status: 403, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
+      field = 'profile_image_url';
+      role = 'player';
     } else if (type === 'coach') {
+      userId = auth.user.id || auth.user.sub;
       table = 'coaches';
-      idField = 'id';
-      entityId = entity_id || auth.user.user_id;
+      field = 'logo_url';
+      role = 'coach';
+    }
 
-      // Verify ownership
-      if (auth.user.role !== 'coach' && auth.user.role !== 'admin' && auth.user.role !== 'editor') {
-        return new Response(
-          JSON.stringify({ detail: 'Insufficient permissions' }),
-          { status: 403, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
-
-      // If coach, verify they're updating their own profile
-      if (auth.user.role === 'coach' && entityId !== auth.user.user_id) {
-        return new Response(
-          JSON.stringify({ detail: 'Can only update own profile' }),
-          { status: 403, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
-    } else {
+    // Verify the user has permission (token role matches requested type)
+    if (auth.user.role !== role) {
       return new Response(
-        JSON.stringify({ detail: 'Invalid type. Must be "player" or "coach"' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        JSON.stringify({ detail: 'Token role does not match requested upload type' }),
+        { status: 403, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
-    // Store image as base64 in database (for Cloudflare Functions without R2)
-    // In production with R2, you'd upload to R2 and store the URL
-    const imageUrl = image; // Store the full base64 data URI
+    // Update the database with the image URL (base64 data URL)
+    const updateData = {
+      [field]: image,
+      updated_at: new Date().toISOString()
+    };
 
-    // Update entity with new image URL
     const { data, error } = await supabaseQuery(env, table, 'PATCH', {
-      eq: { [idField]: entityId },
-      body: { profile_image_url: imageUrl, updated_at: new Date().toISOString() }
+      eq: { id: userId },
+      body: updateData
     });
 
     if (error) {
       return new Response(
-        JSON.stringify({ detail: 'Failed to update profile image', error: error.message }),
+        JSON.stringify({ detail: 'Failed to save image', error: error.message }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
     return new Response(
-      JSON.stringify({
-        success: true,
-        message: 'Image uploaded successfully',
-        image_url: imageUrl
+      JSON.stringify({ 
+        success: true, 
+        image_url: image,
+        message: 'Image uploaded successfully'
       }),
-      { status: 200, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
+      { status: 200, headers: { 
+        'Content-Type': 'application/json', 
+        'Access-Control-Allow-Origin': '*' 
+      }}
     );
+
   } catch (err) {
     return new Response(
       JSON.stringify({ detail: 'Error: ' + err.message }),

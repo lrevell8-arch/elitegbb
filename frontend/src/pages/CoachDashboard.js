@@ -7,10 +7,12 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Badge } from '../components/ui/badge';
-import { 
-  LogOut, Search, Filter, User, Calendar, MapPin, 
+import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
+import {
+  LogOut, Search, Filter, User, Calendar, MapPin,
   ChevronRight, Bookmark, BookmarkCheck, Loader2,
-  GraduationCap, BarChart3, Video, Crown, MessageSquare
+  GraduationCap, BarChart3, Video, Crown, MessageSquare,
+  Camera, Building2
 } from 'lucide-react';
 import ImpersonationBanner from '../components/ImpersonationBanner';
 
@@ -21,7 +23,7 @@ const GRAD_CLASSES = ['2030', '2029', '2028', '2027', '2026', '2025'];
 
 export default function CoachDashboard() {
   const navigate = useNavigate();
-  const { coach, logout, getAuthHeaders } = useCoachAuth();
+  const { coach, logout, getAuthHeaders, uploadLogo } = useCoachAuth();
   const [prospects, setProspects] = useState([]);
   const [savedPlayers, setSavedPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -36,6 +38,8 @@ export default function CoachDashboard() {
     state: '',
     min_ppg: ''
   });
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (activeTab === 'browse') {
@@ -141,6 +145,44 @@ export default function CoachDashboard() {
   const handleLogout = () => {
     logout();
     navigate('/coach/login');
+  };
+
+  const handleLogoClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleLogoChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Logo image must be less than 2MB');
+      return;
+    }
+
+    setIsUploadingLogo(true);
+
+    try {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64String = reader.result;
+        try {
+          await uploadLogo(base64String);
+          toast.success('Logo uploaded successfully');
+        } catch (error) {
+          console.error('Logo upload error:', error);
+          toast.error('Failed to upload logo');
+        } finally {
+          setIsUploadingLogo(false);
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('File read error:', error);
+      toast.error('Failed to read image file');
+      setIsUploadingLogo(false);
+    }
   };
 
   const ProspectCard = ({ prospect, isSaved = false, onSave, onUnsave }) => (
@@ -249,8 +291,32 @@ export default function CoachDashboard() {
       <header className="sticky top-0 z-40 bg-[#121212]/80 backdrop-blur-md border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 lg:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#0134bd] to-[#fb6c1d] flex items-center justify-center">
-              <GraduationCap className="w-5 h-5 text-white" />
+            <div className="relative">
+              <Avatar className="h-12 w-12 border-2 border-[#fb6c1d]">
+                <AvatarImage src={coach?.logo_url} />
+                <AvatarFallback className="bg-gradient-to-r from-[#0134bd] to-[#fb6c1d]">
+                  <Building2 className="w-6 h-6 text-white" />
+                </AvatarFallback>
+              </Avatar>
+              <button
+                onClick={handleLogoClick}
+                disabled={isUploadingLogo}
+                className="absolute bottom-0 right-0 p-1 bg-[#fb6c1d] rounded-full hover:bg-[#fb6c1d]/80 transition-colors disabled:opacity-50"
+                title="Upload logo"
+              >
+                {isUploadingLogo ? (
+                  <Loader2 className="w-3 h-3 text-white animate-spin" />
+                ) : (
+                  <Camera className="w-3 h-3 text-white" />
+                )}
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleLogoChange}
+                className="hidden"
+              />
             </div>
             <div>
               <h1 className="font-heading text-xl font-bold uppercase text-white">Coach Portal</h1>

@@ -126,7 +126,8 @@ export async function onRequestGet(context) {
         school: coach?.[0]?.school,
         title: coach?.[0]?.title,
         state: coach?.[0]?.state,
-        is_verified: coach?.[0]?.is_verified
+        is_verified: coach?.[0]?.is_verified,
+        logo_url: coach?.[0]?.logo_url
       },
       stats: {
         saved_players_count: savedPlayers.length,

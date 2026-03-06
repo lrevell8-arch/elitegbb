@@ -115,6 +115,20 @@ export const CoachAuthProvider = ({ children }) => {
     Authorization: `Bearer ${token}`
   });
 
+  const uploadLogo = async (base64Image) => {
+    const response = await axios.post(`${API_URL}/api/upload/image`, {
+      image: base64Image,
+      type: 'coach'
+    }, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    // Update coach with new logo URL
+    if (response.data.image_url) {
+      setCoach(prev => ({ ...prev, logo_url: response.data.image_url }));
+    }
+    return response.data;
+  };
+
   const value = {
     coach,
     token,
@@ -124,6 +138,7 @@ export const CoachAuthProvider = ({ children }) => {
     login,
     register,
     logout,
+    uploadLogo,
     getAuthHeaders
   };
 

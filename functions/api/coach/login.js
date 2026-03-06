@@ -167,7 +167,8 @@ export async function onRequestPost(context) {
           state: coach.state,
           role: 'coach',
           is_verified: coach.is_verified,
-          saved_players: coach.saved_players || []
+          saved_players: coach.saved_players || [],
+          logo_url: coach.logo_url
         }
       }),
       {

@@ -112,6 +112,7 @@ export async function onRequestPost(context) {
       is_verified: coach.is_verified,
       is_active: coach.is_active,
       saved_players: coach.saved_players,
+      logo_url: coach.logo_url,
       impersonated_by: auth.user.id,
       impersonated_by_email: auth.user.email,
       is_impersonation: true,
@@ -130,7 +131,8 @@ export async function onRequestPost(context) {
           name: coach.name,
           email: coach.email,
           school: coach.school,
-          title: coach.title
+          title: coach.title,
+          logo_url: coach.logo_url
         },
         redirect_url: '/coach/dashboard'
       }),
