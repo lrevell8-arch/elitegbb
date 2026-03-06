@@ -178,7 +178,10 @@ CREATE INDEX IF NOT EXISTS idx_reminders_type ON reminders(reminder_type);
 ALTER TABLE reminders ENABLE ROW LEVEL SECURITY;
 
 -- Allow access to staff
-CREATE POLICY IF NOT EXISTS "Allow reminders access to staff" ON reminders
+-- Drop if exists first (PostgreSQL doesn't support IF NOT EXISTS for policies)
+DROP POLICY IF EXISTS "Allow reminders access to staff" ON reminders;
+
+CREATE POLICY "Allow reminders access to staff" ON reminders
     FOR ALL USING (
         EXISTS (SELECT 1 FROM staff_users WHERE id::text = auth.uid()::text)
     );
