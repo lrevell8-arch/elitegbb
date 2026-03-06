@@ -6,9 +6,69 @@
   "exclude": [],
   "routes": [
     {
+      "pattern": "/api/admin/coaches",
+      "method": "GET,POST,OPTIONS",
+      "function": "/api/admin/coaches/index"
+    },
+    {
+      "pattern": "/api/admin/coaches/*",
+      "method": "GET,OPTIONS",
+      "function": "/api/admin/coaches/[coachId]/index"
+    },
+    {
       "pattern": "/api/admin/coaches/*/verify",
-      "method": "PATCH",
+      "method": "PATCH,OPTIONS",
       "function": "/api/admin/coaches/[coachId]/verify"
+    },
+    {
+      "pattern": "/api/admin/players",
+      "method": "GET,PATCH,OPTIONS",
+      "function": "/api/admin/players/index"
+    },
+    {
+      "pattern": "/api/admin/players/*/verify",
+      "method": "PATCH,OPTIONS",
+      "function": "/api/admin/players/[id]/verify"
+    },
+    {
+      "pattern": "/api/admin/deliverables/badge/*",
+      "method": "GET,OPTIONS",
+      "function": "/api/admin/deliverables/badge/[playerId]"
+    },
+    {
+      "pattern": "/api/admin/deliverables/pdf/*/*",
+      "method": "GET,OPTIONS",
+      "function": "/api/admin/deliverables/pdf/[[type]]/[playerId]"
+    },
+    {
+      "pattern": "/api/admin/import/coaches",
+      "method": "POST,GET,OPTIONS",
+      "function": "/api/admin/import/coaches"
+    },
+    {
+      "pattern": "/api/admin/import/players",
+      "method": "POST,GET,OPTIONS",
+      "function": "/api/admin/import/players"
+    },
+    {
+      "pattern": "/api/admin/dashboard",
+      "method": "GET,OPTIONS",
+      "function": "/api/admin/dashboard/index"
+    },
+    {
+      "pattern": "/api/admin/stats",
+      "method": "GET,OPTIONS",
+      "function": "/api/admin/dashboard/index"
+    },
+    {
+      "pattern": "/api/admin/pipeline",
+      "method": "GET,OPTIONS",
+      "function": "/api/admin/pipeline/index"
+    },
+    {
+      "pattern": "/api/admin/export",
+      "method": "POST,OPTIONS",
+      "function": "/api/admin/export/index"
     }
   ]
 }

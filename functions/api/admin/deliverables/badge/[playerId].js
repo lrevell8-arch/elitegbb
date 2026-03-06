@@ -262,6 +262,10 @@ export async function onRequestGet(context) {
     // Generate badge
     const svg = variant === 'compact' ? generateCompactBadgeSVG(player) : generateBadgeSVG(player);
 
+    // Check if JSON response is requested (via Accept header or explicit json param)
+    const acceptHeader = request.headers.get('Accept') || '';
+    const wantsJson = acceptHeader.includes('application/json') || url.searchParams.get('json') === 'true';
+
     // Return based on requested format
     if (format === 'html') {
       // Return HTML page with the badge embedded
@@ -366,7 +370,32 @@ export async function onRequestGet(context) {
       );
     }
 
-    // Default: return raw SVG
+    // Default: return SVG (JSON format if requested, otherwise raw SVG)
+    if (wantsJson || format === 'svg') {
+      // Return JSON with SVG data for frontend consumption
+      return new Response(
+        JSON.stringify({
+          success: true,
+          svg: svg,
+          player: {
+            id: player.id,
+            name: player.player_name,
+            verified: player.verified
+          },
+          filename: `${player.player_name?.replace(/\s+/g, '_') || 'Player'}_Badge.svg`
+        }),
+        {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Cache-Control': 'public, max-age=3600'
+          }
+        }
+      );
+    }
+
+    // Return raw SVG for direct browser viewing
     return new Response(svg, {
       status: 200,
       headers: {
