@@ -331,7 +331,8 @@ async function loadTestData() {
           parent_name: player.parent_name,
           parent_email: player.parent_email,
           parent_phone: player.parent_phone,
-          player_email: player.player_email
+          player_email: player.player_email,
+          package_selected: 'development' // Default package for intake
         })
       });
 
