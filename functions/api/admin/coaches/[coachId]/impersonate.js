@@ -99,7 +99,9 @@ export async function onRequestPost(context) {
 
     // Generate impersonation token
     // This token will have the coach's identity but marked as an impersonation session
+    // IMPORTANT: Must use 'sub' to match regular coach login token structure
     const impersonationPayload = {
+      sub: coach.id,
       id: coach.id,
       email: coach.email,
       name: coach.name,

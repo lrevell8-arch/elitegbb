@@ -99,7 +99,9 @@ export async function onRequestPost(context) {
 
     // Generate impersonation token
     // This token will have the player's identity but marked as an impersonation session
+    // IMPORTANT: Must use 'user_id' to match regular player login token structure
     const impersonationPayload = {
+      user_id: player.id,
       id: player.id,
       email: player.email || player.player_key,
       player_key: player.player_key,

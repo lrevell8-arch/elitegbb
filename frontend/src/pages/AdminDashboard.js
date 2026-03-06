@@ -720,9 +720,9 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <DemoButton type="one-pager" sampleId="sample-1" label="One-Pager" />
-                      <DemoButton type="tracking-profile" sampleId="sample-1" label="Tracking Profile" />
-                      <DemoButton type="badge" sampleId="sample-1" label="Badge" />
+                      <DemoButton type="one-pager" sampleId="sample-1" label="One-Pager" getAuthHeaders={getAuthHeaders} />
+                      <DemoButton type="tracking-profile" sampleId="sample-1" label="Tracking Profile" getAuthHeaders={getAuthHeaders} />
+                      <DemoButton type="badge" sampleId="sample-1" label="Badge" getAuthHeaders={getAuthHeaders} />
                     </div>
                   </div>
 
@@ -738,9 +738,9 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <DemoButton type="one-pager" sampleId="sample-2" label="One-Pager" />
-                      <DemoButton type="tracking-profile" sampleId="sample-2" label="Tracking Profile" />
-                      <DemoButton type="badge" sampleId="sample-2" label="Badge" />
+                      <DemoButton type="one-pager" sampleId="sample-2" label="One-Pager" getAuthHeaders={getAuthHeaders} />
+                      <DemoButton type="tracking-profile" sampleId="sample-2" label="Tracking Profile" getAuthHeaders={getAuthHeaders} />
+                      <DemoButton type="badge" sampleId="sample-2" label="Badge" getAuthHeaders={getAuthHeaders} />
                     </div>
                   </div>
 
@@ -756,9 +756,9 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <DemoButton type="one-pager" sampleId="sample-3" label="One-Pager" />
-                      <DemoButton type="tracking-profile" sampleId="sample-3" label="Tracking Profile" />
-                      <DemoButton type="badge" sampleId="sample-3" label="Badge" />
+                      <DemoButton type="one-pager" sampleId="sample-3" label="One-Pager" getAuthHeaders={getAuthHeaders} />
+                      <DemoButton type="tracking-profile" sampleId="sample-3" label="Tracking Profile" getAuthHeaders={getAuthHeaders} />
+                      <DemoButton type="badge" sampleId="sample-3" label="Badge" getAuthHeaders={getAuthHeaders} />
                     </div>
                   </div>
 
@@ -793,22 +793,54 @@ export default function AdminDashboard() {
   );
 }
 
-// Demo button component
-function DemoButton({ type, sampleId, label }) {
+// Demo button component - defined outside main component
+function DemoButton({ type, sampleId, label, getAuthHeaders }) {
   const API_URL = process.env.REACT_APP_BACKEND_URL;
+  const [loading, setLoading] = useState(false);
 
-  const generateDemo = () => {
-    const url = `${API_URL}/api/admin/demo-deliverables/${type}/${sampleId}`;
-    window.open(url, '_blank');
+  const generateDemo = async () => {
+    setLoading(true);
+    try {
+      const url = `${API_URL}/api/admin/demo-deliverables/${type}/${sampleId}`;
+      const response = await fetch(url, {
+        headers: getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          toast.error('Authentication failed. Please log in again.');
+          return;
+        }
+        throw new Error(`Failed to generate: ${response.status}`);
+      }
+
+      // Get the content as blob
+      const blob = await response.blob();
+      const objectUrl = window.URL.createObjectURL(blob);
+
+      // Open in new tab
+      window.open(objectUrl, '_blank');
+
+      // Clean up the object URL after a delay
+      setTimeout(() => window.URL.revokeObjectURL(objectUrl), 60000);
+
+      toast.success(`${label} opened in new tab`);
+    } catch (error) {
+      console.error('Demo generation error:', error);
+      toast.error('Failed to generate demo deliverable');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <button
       onClick={generateDemo}
-      className="w-full flex items-center justify-between px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-white/70 hover:text-white text-sm transition-colors"
+      disabled={loading}
+      className="w-full flex items-center justify-between px-3 py-2 bg-white/5 hover:bg-white/10 disabled:bg-white/5 disabled:opacity-50 rounded-lg text-white/70 hover:text-white text-sm transition-colors"
     >
-      <span>{label}</span>
-      <Download className="w-4 h-4" />
+      <span>{loading ? 'Loading...' : label}</span>
+      {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
     </button>
   );
 }
