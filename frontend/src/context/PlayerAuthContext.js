@@ -13,14 +13,50 @@ export const usePlayerAuth = () => {
   return context;
 };
 
+// JWT decode helper to check token payload without verification
+const decodeJWT = (token) => {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    return null;
+  }
+};
+
 export const PlayerAuthProvider = ({ children }) => {
   const [player, setPlayer] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('hwh_player_token'));
   const [loading, setLoading] = useState(true);
+  const [isImpersonating, setIsImpersonating] = useState(false);
 
   useEffect(() => {
     const initAuth = async () => {
-      const storedToken = localStorage.getItem('hwh_player_token');
+      // First check for direct player token
+      let storedToken = localStorage.getItem('hwh_player_token');
+      let impersonationMode = false;
+
+      // If no player token, check if there's an admin impersonating as player
+      if (!storedToken) {
+        const adminToken = localStorage.getItem('hwh_token');
+        const isImpersonatingFlag = localStorage.getItem('hwh_impersonating') === 'true';
+
+        if (adminToken && isImpersonatingFlag) {
+          // Check if the admin token contains a player role
+          const payload = decodeJWT(adminToken);
+          if (payload && payload.role === 'player') {
+            storedToken = adminToken;
+            impersonationMode = true;
+          }
+        }
+      }
+
       if (storedToken) {
         try {
           const response = await axios.get(`${API_URL}/api/player/profile`, {
@@ -28,11 +64,13 @@ export const PlayerAuthProvider = ({ children }) => {
           });
           setPlayer(response.data);
           setToken(storedToken);
+          setIsImpersonating(impersonationMode);
         } catch (error) {
           console.error('Player auth init error:', error);
           localStorage.removeItem('hwh_player_token');
           setToken(null);
           setPlayer(null);
+          setIsImpersonating(false);
         }
       }
       setLoading(false);
@@ -54,9 +92,17 @@ export const PlayerAuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    // If in impersonation mode, don't clear the hwh_token (admin's token)
+    // Just clear the player token and impersonation flags
+    if (isImpersonating) {
+      localStorage.removeItem('hwh_impersonating');
+      localStorage.removeItem('hwh_original_admin');
+      // Note: We keep hwh_token so admin can continue their session
+    }
     localStorage.removeItem('hwh_player_token');
     setToken(null);
     setPlayer(null);
+    setIsImpersonating(false);
   };
 
   const updateProfile = async (profileData) => {
@@ -100,6 +146,7 @@ export const PlayerAuthProvider = ({ children }) => {
     token,
     loading,
     isAuthenticated: !!token && !!player,
+    isImpersonating,
     login,
     logout,
     updateProfile,

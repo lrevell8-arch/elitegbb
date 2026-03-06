@@ -73,17 +73,24 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Impersonation login - admin logs in as another user
-  const impersonateUser = async (impersonationToken, userData, adminData) => {
+  const impersonateUser = async (impersonationToken, userData, adminData, targetRole = 'player') => {
     // Store the current admin token before switching
     localStorage.setItem('hwh_token', impersonationToken);
     localStorage.setItem('hwh_impersonating', 'true');
     localStorage.setItem('hwh_original_admin', JSON.stringify(adminData));
-    
+
+    // Also store in role-specific token key so PlayerAuthContext/CoachAuthContext can find it
+    if (targetRole === 'player') {
+      localStorage.setItem('hwh_player_token', impersonationToken);
+    } else if (targetRole === 'coach') {
+      localStorage.setItem('hwh_coach_token', impersonationToken);
+    }
+
     setToken(impersonationToken);
     setUser(userData);
     setIsImpersonating(true);
     setOriginalAdmin(adminData);
-    
+
     return userData;
   };
 
@@ -100,12 +107,16 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('hwh_token', adminToken);
     localStorage.removeItem('hwh_impersonating');
     localStorage.removeItem('hwh_original_admin');
-    
+
+    // Also clear any role-specific tokens that were set during impersonation
+    localStorage.removeItem('hwh_player_token');
+    localStorage.removeItem('hwh_coach_token');
+
     setToken(adminToken);
     setUser(originalAdmin.user);
     setIsImpersonating(false);
     setOriginalAdmin(null);
-    
+
     return originalAdmin.user;
   };
 

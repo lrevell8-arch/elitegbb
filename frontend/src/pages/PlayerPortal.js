@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 import { WatermarkOverlay } from '../components/ui/watermark-overlay';
 import { Separator } from '../components/ui/separator';
+import ImpersonationBanner from '../components/ImpersonationBanner';
 import {
   Loader2,
   User,
@@ -1194,6 +1195,7 @@ export default function PlayerPortal() {
           </div>
         </div>
       )}
+      <ImpersonationBanner />
     </div>
   );
 }

@@ -189,8 +189,8 @@ export default function PlayerDirectory() {
           user: adminUser
         };
 
-        // Use impersonation function from AuthContext
-        await impersonateUser(response.data.token, response.data.player, adminData);
+        // Use impersonation function from AuthContext - pass 'player' as target role
+        await impersonateUser(response.data.token, response.data.player, adminData, 'player');
 
         toast.success(`Logged in as ${player.player_name}`);
 

@@ -12,6 +12,7 @@ import {
   ChevronRight, Bookmark, BookmarkCheck, Loader2,
   GraduationCap, BarChart3, Video, Crown, MessageSquare
 } from 'lucide-react';
+import ImpersonationBanner from '../components/ImpersonationBanner';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -492,6 +493,7 @@ export default function CoachDashboard() {
           </>
         )}
       </main>
+      <ImpersonationBanner />
     </div>
   );
 }

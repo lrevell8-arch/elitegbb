@@ -157,8 +157,8 @@ export default function AdminCoaches() {
           user: adminUser
         };
 
-        // Use impersonation function from AuthContext
-        await impersonateUser(response.data.token, response.data.coach, adminData);
+        // Use impersonation function from AuthContext - pass 'coach' as target role
+        await impersonateUser(response.data.token, response.data.coach, adminData, 'coach');
 
         toast.success(`Logged in as ${coach.name}`);
 
