@@ -122,7 +122,8 @@ const SAMPLE_INTAKE_SUBMISSIONS = [
     highlight_links: ["https://youtube.com/watch?v=highlight1"],
     level: "AAU",
     team_names: "Atlanta Lady Panthers",
-    iq_self_rating: 8
+    iq_self_rating: 8,
+    goal: "Play college basketball at a high academic Division I school while pursuing a degree in business or sports medicine."
   },
   {
     self_words: "Strong, Relentless, Worker",
@@ -144,7 +145,8 @@ const SAMPLE_INTAKE_SUBMISSIONS = [
     highlight_links: [],
     level: "School",
     team_names: "Riverside Ravens",
-    iq_self_rating: 7
+    iq_self_rating: 7,
+    goal: "Earn a scholarship to play basketball at a competitive Division II program and study kinesiology."
   },
   {
     self_words: "Shooter, Competitor, Student",
@@ -166,7 +168,8 @@ const SAMPLE_INTAKE_SUBMISSIONS = [
     highlight_links: ["https://youtube.com/watch?v=highlight3"],
     level: "AAU",
     team_names: "Chicago Sky Elite",
-    iq_self_rating: 9
+    iq_self_rating: 9,
+    goal: "Play at a Power Five conference school with strong academics and compete for a national championship."
   },
   {
     self_words: "Playmaker, Floor General, Quick",
@@ -188,7 +191,8 @@ const SAMPLE_INTAKE_SUBMISSIONS = [
     highlight_links: [],
     level: "School",
     team_names: "Jefferson Jaguars",
-    iq_self_rating: 8
+    iq_self_rating: 8,
+    goal: "Earn an athletic scholarship to play point guard at a Division I program with a winning tradition."
   },
   {
     self_words: "Protector, Anchor, Presence",
@@ -210,7 +214,8 @@ const SAMPLE_INTAKE_SUBMISSIONS = [
     highlight_links: ["https://youtube.com/watch?v=highlight5"],
     level: "AAU",
     team_names: "Seattle Storm Youth",
-    iq_self_rating: 7
+    iq_self_rating: 7,
+    goal: "Play college basketball while getting a degree in computer science, potentially at a STEM-focused university."
   }
 ];
 
