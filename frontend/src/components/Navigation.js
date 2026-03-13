@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   Menu, X, Home, User, Users, Shield, 
-  ChevronDown, LogOut, GraduationCap 
+  ChevronDown, LogOut, GraduationCap, MessageCircle
 } from 'lucide-react';
 import { Button } from './ui/button';
 
@@ -48,8 +48,8 @@ const Navigation = ({
   ];
 
   const playerLinks = [
-    { label: 'My Profile', path: '/player/portal', icon: User },
-    { label: 'Connections', path: '/player/connections', icon: Users },
+    { label: 'My Profile', path: '/player', icon: User },
+    { label: 'Community', path: '/community', icon: MessageCircle },
   ];
 
   const getLinks = () => {

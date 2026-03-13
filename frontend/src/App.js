@@ -34,6 +34,10 @@ import CoachCompare from "./pages/CoachCompare";
 import PlayerLogin from "./pages/PlayerLogin";
 import PlayerPortal from "./pages/PlayerPortal";
 
+// Community Pages
+import CommunityFeed from "./pages/CommunityFeed";
+import PostDetail from "./pages/PostDetail";
+
 // Protected Route for Admin
 const AdminRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -213,6 +217,10 @@ function AppRoutes() {
           </PlayerRoute>
         }
       />
+
+      {/* Community Routes */}
+      <Route path="/community" element={<CommunityFeed />} />
+      <Route path="/community/post/:postId" element={<PostDetail />} />
     </Routes>
   );
 }
