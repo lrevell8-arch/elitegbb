@@ -44,9 +44,13 @@ export default function ProjectDetail() {
   const [editingNotes, setEditingNotes] = useState(false);
   const [generatingDeliverable, setGeneratingDeliverable] = useState(null);
 
-  useEffect(() => {
-    fetchProject();
-  }, [fetchProject]);
+  if (!API_URL) {
+    return (
+      <div className="min-h-screen bg-[#0b0b0b] flex items-center justify-center">
+        <p className="text-white/70">Missing REACT_APP_BACKEND_URL. Check Cloudflare environment settings.</p>
+      </div>
+    );
+  }
 
   const fetchProject = useCallback(async () => {
     try {
@@ -62,6 +66,10 @@ export default function ProjectDetail() {
       setLoading(false);
     }
   }, [getAuthHeaders, projectId]);
+
+  useEffect(() => {
+    fetchProject();
+  }, [fetchProject]);
 
   const updateStatus = async (newStatus) => {
     try {
