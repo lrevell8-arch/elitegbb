@@ -94,20 +94,20 @@ export default function PlayerEvaluation() {
           <div className="z-10 text-center px-12">
             <div className="mb-12">
               <img 
-                src="https://placehold.co/400x160/ffffff/0134bd?text=HOOP+WITH+HER" 
-                alt="Hoop With Her Logo" 
+                src="https://placehold.co/400x160/ffffff/0134bd?text=ELITE+GBB" 
+                alt="EliteGBB Logo" 
                 className="mx-auto w-64"
               />
             </div>
             
             <h1 className="font-heading text-6xl font-black text-[#0134bd] uppercase tracking-tighter leading-none mb-4">
-              🏀 Hoop With Her® <br />Player Scouting & <br />Development Packet
+              EliteGBB® <br />Player Evaluation & <br />Development Packet
             </h1>
             
             <div className="h-2 w-32 bg-[#fb6c1d] mx-auto mb-8"></div>
             
             <p className="text-2xl font-medium text-gray-700 uppercase tracking-tight">
-              Evaluating & Developing Middle School <br />Girls' Basketball Talent
+              Elite Evaluation & Development <br />for High-Performance Athletes
             </p>
             
             <div className="mt-16">
@@ -122,7 +122,7 @@ export default function PlayerEvaluation() {
           </div>
           
           <div className="absolute bottom-12 text-gray-400 font-mono text-xs">
-            © {new Date().getFullYear()} HOOP WITH HER® PLAYER ADVANTAGE™
+            © {new Date().getFullYear()} ELITEGBB® PLAYER ADVANTAGE™
           </div>
         </div>
 
@@ -237,7 +237,7 @@ export default function PlayerEvaluation() {
             </section>
           </div>
           <footer className="mt-auto pt-8 flex justify-between text-[10px] text-gray-400 font-mono">
-            <span>PLAYER SCOUTING & DEVELOPMENT PACKET</span>
+            <span>ELITE PLAYER EVALUATION PACKET</span>
             <span>PAGE 2</span>
           </footer>
         </div>
@@ -358,7 +358,7 @@ export default function PlayerEvaluation() {
             </section>
           </div>
           <footer className="mt-auto pt-8 flex justify-between text-[10px] text-gray-400 font-mono">
-            <span>PLAYER SCOUTING & DEVELOPMENT PACKET</span>
+            <span>ELITE PLAYER EVALUATION PACKET</span>
             <span>PAGE 3</span>
           </footer>
         </div>
@@ -440,7 +440,7 @@ export default function PlayerEvaluation() {
             </div>
           </div>
           <footer className="mt-auto pt-8 flex justify-between text-[10px] text-gray-400 font-mono">
-            <span>PLAYER SCOUTING & DEVELOPMENT PACKET</span>
+            <span>ELITE PLAYER EVALUATION PACKET</span>
             <span>PAGE 4</span>
           </footer>
         </div>
@@ -460,14 +460,14 @@ export default function PlayerEvaluation() {
           {/* Watermark */}
           <div className="absolute bottom-12 right-12 opacity-10 pointer-events-none">
              <img 
-                src="https://placehold.co/200x80/ffffff/0134bd?text=HOOP+WITH+HER" 
-                alt="Watermark" 
+                src="https://placehold.co/200x80/ffffff/0134bd?text=ELITE+GBB" 
+                alt="EliteGBB Watermark" 
                 className="w-48 grayscale"
               />
           </div>
 
           <footer className="mt-auto pt-8 flex justify-between text-[10px] text-gray-400 font-mono">
-            <span>PLAYER SCOUTING & DEVELOPMENT PACKET</span>
+            <span>ELITE PLAYER EVALUATION PACKET</span>
             <span>PAGE 5</span>
           </footer>
         </div>
@@ -526,7 +526,7 @@ export default function PlayerEvaluation() {
           </div>
 
           <footer className="mt-auto pt-8 flex justify-between text-[10px] text-gray-400 font-mono">
-            <span>PLAYER SCOUTING & DEVELOPMENT PACKET</span>
+            <span>ELITE PLAYER EVALUATION PACKET</span>
             <span>PAGE 6</span>
           </footer>
         </div>
@@ -546,18 +546,18 @@ export default function PlayerEvaluation() {
           <div className="z-10 text-center px-12 max-w-2xl">
             <div className="mb-12">
               <img 
-                src="https://placehold.co/300x120/ffffff/0134bd?text=HOOP+WITH+HER" 
-                alt="Hoop With Her Logo" 
+                src="https://placehold.co/300x120/ffffff/0134bd?text=ELITE+GBB" 
+                alt="EliteGBB Logo" 
                 className="mx-auto w-48"
               />
             </div>
             
             <h2 className="font-heading text-4xl font-black text-[#0134bd] uppercase tracking-tighter mb-6">
-              Our Mission
+              EliteGBB Mission
             </h2>
             
             <p className="text-2xl font-medium text-gray-700 leading-relaxed mb-12">
-              "Empowering girls through basketball by providing opportunities, exposure, and elite-level training."
+              "Delivering elite exposure, evaluation, and development for the next generation of high-performance athletes."
             </p>
             
             <div className="h-1 w-32 bg-[#fb6c1d] mx-auto mb-12"></div>
@@ -565,15 +565,15 @@ export default function PlayerEvaluation() {
             <div className="space-y-4">
               <div className="flex items-center justify-center gap-2 text-gray-600">
                 <span className="font-bold text-[#0134bd]">Website:</span>
-                <span>www.hoopwithher.com</span>
+                <span>www.App.EliteGBB.com</span>
               </div>
               <div className="flex items-center justify-center gap-2 text-gray-600">
                 <span className="font-bold text-[#0134bd]">Email:</span>
-                <span>team@hoopwithher.com</span>
+                <span>info@elitegbb.com</span>
               </div>
               <div className="flex items-center justify-center gap-2 text-gray-600">
                 <span className="font-bold text-[#0134bd]">Socials:</span>
-                <span>@hoopwithher</span>
+                <span>@elitegbb</span>
               </div>
             </div>
           </div>
