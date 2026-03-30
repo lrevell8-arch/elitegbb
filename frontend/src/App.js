@@ -209,6 +209,7 @@ function AppRoutes() {
 
       {/* Player Routes */}
       <Route path="/player/login" element={<PlayerLogin />} />
+      <Route path="/portal" element={<Navigate to="/player" replace />} />
       <Route
         path="/player"
         element={
