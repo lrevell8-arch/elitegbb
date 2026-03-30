@@ -107,7 +107,7 @@ export default function PlayerEvaluation() {
             <div className="h-2 w-32 bg-[#fb6c1d] mx-auto mb-8"></div>
             
             <p className="text-2xl font-medium text-gray-700 uppercase tracking-tight">
-              Elite Evaluation & Development <br />for High-Performance Athletes
+              Evaluating & Developing <br />Girls' Basketball Talent
             </p>
             
             <div className="mt-16">

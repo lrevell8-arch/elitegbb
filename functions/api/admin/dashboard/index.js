@@ -79,9 +79,9 @@ export async function onRequestGet(context) {
       projectsResult,
       messagesResult
     ] = await Promise.all([
-      supabaseQuery(env, 'players', 'GET', { select: 'id,payment_status,verified', limit: 1000 }),
+      supabaseQuery(env, 'players', 'GET', { select: 'id,payment_status,verified,created_at', limit: 1000 }),
       supabaseQuery(env, 'coaches', 'GET', { select: 'id,is_active', limit: 1000 }),
-      supabaseQuery(env, 'projects', 'GET', { select: 'id,status', limit: 1000 }),
+      supabaseQuery(env, 'projects', 'GET', { select: 'id,status,package_type', limit: 1000 }),
       supabaseQuery(env, 'coach_messages', 'GET', { select: 'id,read', limit: 1000 })
     ]);
 
@@ -89,6 +89,17 @@ export async function onRequestGet(context) {
     const coaches = coachesResult.data || [];
     const projects = projectsResult.data || [];
     const messages = messagesResult.data || [];
+
+    const recentCutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const recentSubmissions = players.filter(player => player.created_at && new Date(player.created_at) >= recentCutoff).length;
+
+    const packagesBreakdown = projects.reduce((acc, project) => {
+      const packageKey = project.package_type === 'basic' ? 'starter' : project.package_type;
+      if (packageKey && acc[packageKey] !== undefined) {
+        acc[packageKey] += 1;
+      }
+      return acc;
+    }, { starter: 0, development: 0, elite_track: 0 });
 
     // Calculate stats
     const stats = {
@@ -98,7 +109,8 @@ export async function onRequestGet(context) {
         active_projects: projects.filter(p => p.status === 'in_progress').length,
         pending_projects: projects.filter(p => p.status === 'pending').length,
         completed_projects: projects.filter(p => p.status === 'completed').length,
-        unread_messages: messages.filter(m => !m.read).length
+        unread_messages: messages.filter(m => !m.read).length,
+        recent_submissions: recentSubmissions
       },
       players: {
         total: players.length,
@@ -116,9 +128,11 @@ export async function onRequestGet(context) {
         total: projects.length,
         pending: projects.filter(p => p.status === 'pending').length,
         in_progress: projects.filter(p => p.status === 'in_progress').length,
+        review: projects.filter(p => p.status === 'review').length,
         completed: projects.filter(p => p.status === 'completed').length,
         cancelled: projects.filter(p => p.status === 'cancelled').length
-      }
+      },
+      packages_breakdown: packagesBreakdown
     };
 
     return new Response(
