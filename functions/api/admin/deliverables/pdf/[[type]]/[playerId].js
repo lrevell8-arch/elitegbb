@@ -595,10 +595,6 @@ function generateFilmIndexHTML(player) {
     { title: 'Training Session', url: 'https://hudl.com/not-set', type: 'Training', duration: '8:20' }
   ];
   const badgeMeta = getBadgeMeta(player);
-    { title: 'Highlight Reel 2024', url: player.highlight_url || 'https://hudl.com/not-set', type: 'Highlights', duration: '3:45' },
-    { title: 'Full Game vs. Regional', url: 'https://hudl.com/not-set', type: 'Game Film', duration: '32:00' },
-    { title: 'Training Session', url: 'https://hudl.com/not-set', type: 'Training', duration: '8:20' }
-  ];
 
   return `<!DOCTYPE html>
 <html>
