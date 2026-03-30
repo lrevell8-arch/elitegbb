@@ -144,7 +144,7 @@ export default function ProjectDetail() {
       toast.success(`${DELIVERABLE_TYPES[deliverableType]} generated (mock)`);
     } catch (error) {
       console.error('Error generating deliverable:', error);
-      toast.error('Failed to generate deliverable');
+      toast.error(error.response?.data?.detail || 'Failed to generate deliverable');
     } finally {
       setGeneratingDeliverable(null);
     }
