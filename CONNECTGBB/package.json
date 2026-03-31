@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "pages:build": "next build && npx @cloudflare/next-on-pages",
+    "pages:dev": "npx wrangler pages dev .vercel/output/static --compatibility-date=2024-01-01"
   },
   "dependencies": {
     "@stripe/stripe-js": "^9.0.1",
@@ -17,6 +19,7 @@
     "stripe": "^21.0.1"
   },
   "devDependencies": {
+    "@cloudflare/next-on-pages": "^1.13.8",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

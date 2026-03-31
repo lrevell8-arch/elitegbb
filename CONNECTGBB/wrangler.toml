@@ -1,0 +1,14 @@
+name = "connectgbb"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+pages_build_output_dir = ".vercel/output/static"
+
+[vars]
+SUPABASE_URL = "https://srrasrbsqajtssqlxoju.supabase.co"
+
+[env.production.vars]
+SUPABASE_URL = "https://srrasrbsqajtssqlxoju.supabase.co"
+
+[env.preview.vars]
+SUPABASE_URL = "https://srrasrbsqajtssqlxoju.supabase.co"
