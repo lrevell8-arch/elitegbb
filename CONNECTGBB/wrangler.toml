@@ -6,9 +6,12 @@ pages_build_output_dir = ".open-next"
 
 [vars]
 SUPABASE_URL = "https://srrasrbsqajtssqlxoju.supabase.co"
+NEXT_PUBLIC_SUPABASE_URL = "https://srrasrbsqajtssqlxoju.supabase.co"
 
 [env.production.vars]
 SUPABASE_URL = "https://srrasrbsqajtssqlxoju.supabase.co"
+NEXT_PUBLIC_SUPABASE_URL = "https://srrasrbsqajtssqlxoju.supabase.co"
 
 [env.preview.vars]
 SUPABASE_URL = "https://srrasrbsqajtssqlxoju.supabase.co"
+NEXT_PUBLIC_SUPABASE_URL = "https://srrasrbsqajtssqlxoju.supabase.co"
