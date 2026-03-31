@@ -7,7 +7,7 @@
     "build": "NEXT_DISABLE_TURBOPACK=1 next build",
     "start": "next start",
     "lint": "eslint",
-    "pages:build": "node_modules/.bin/opennextjs-cloudflare build && cp .open-next/worker.js .open-next/_worker.js",
+    "pages:build": "NEXT_DISABLE_TURBOPACK=1 node_modules/.bin/opennextjs-cloudflare build && cp .open-next/worker.js .open-next/_worker.js",
     "pages:preview": "npx @opennextjs/cloudflare preview"
   },
   "dependencies": {
