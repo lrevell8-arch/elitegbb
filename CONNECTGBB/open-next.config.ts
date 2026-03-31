@@ -9,7 +9,7 @@ const config = {
       queue: "direct"
     }
   },
-  edgeExternals: ["node:crypto"],
+  edgeExternals: ["node:crypto", "node:https", "node:http", "node:net", "node:tls", "node:stream", "node:buffer", "node:url", "node:events", "node:util"],
   middleware: {
     external: true,
     override: {
