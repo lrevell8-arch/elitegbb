@@ -1,0 +1,9 @@
+SUPABASE_URL=https://srrasrbsqajtssqlxoju.supabase.co
+NEXT_PUBLIC_SUPABASE_URL=https://srrasrbsqajtssqlxoju.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+JWT_SECRET=local-dev
+STRIPE_SECRET_KEY=your_stripe_secret
+STRIPE_WEBHOOK_SECRET=your_webhook_secret
+NEXT_PUBLIC_STRIPE_PRICE_ID_DEVELOPMENT=your_price_id
+NEXT_PUBLIC_STRIPE_PRICE_ID_ELITE=your_price_id
