@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "NEXT_DISABLE_TURBOPACK=1 next build",
+    "build": "NEXT_DISABLE_TURBOPACK=1 NEXT_FORCE_WEBPACK=1 next build",
     "start": "next start",
     "lint": "eslint",
-    "pages:build": "NEXT_DISABLE_TURBOPACK=1 node_modules/.bin/opennextjs-cloudflare build && cp .open-next/worker.js .open-next/_worker.js",
+    "pages:build": "NEXT_DISABLE_TURBOPACK=1 NEXT_FORCE_WEBPACK=1 node_modules/.bin/opennextjs-cloudflare build && cp .open-next/worker.js .open-next/_worker.js",
     "pages:preview": "npx @opennextjs/cloudflare preview"
   },
   "dependencies": {
