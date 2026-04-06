@@ -3,7 +3,7 @@ compatibility_date = "2024-01-01"
 compatibility_flags = ["nodejs_compat"]
 
 # Cloudflare Pages configuration
-pages_build_output_dir = "frontend/build"
+pages_build_output_dir = "CONNECTGBB/build"
 
 # ============================================================================
 # VERIFIED SUPABASE CONFIGURATION
