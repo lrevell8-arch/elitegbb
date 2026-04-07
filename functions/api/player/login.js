@@ -39,23 +39,41 @@ async function supabaseQuery(env, table, method, params = {}) {
   return { data, error: null };
 }
 
-// Simple password hash verification using SHA-256
-async function verifyPassword(password, hashedPassword) {
-  // Check if it's a bcrypt hash (starts with $2)
-  if (hashedPassword && hashedPassword.startsWith('$2')) {
-    // For bcrypt, we'd need a bcrypt library - for now return false
-    // In production, use a proper bcrypt implementation
-    return false;
+// Password verification supporting legacy formats used across imports/setup
+async function verifyPassword(password, storedPassword) {
+  if (!storedPassword) return false;
+
+  // Plaintext fallback format used by some legacy setup flows: PLAIN:password
+  if (storedPassword.startsWith('PLAIN:')) {
+    return password === storedPassword.substring(6);
   }
 
-  // Try SHA-256 with salt format (salt:hash)
-  if (hashedPassword && hashedPassword.includes(':')) {
-    const [salt, storedHash] = hashedPassword.split(':');
-    const encoder = new TextEncoder();
+  // Bcrypt hashes cannot be verified without bcrypt library in Workers runtime here.
+  // Temporary compatibility fallback: accept direct match if plaintext was stored.
+  if (storedPassword.startsWith('$2')) {
+    return password === storedPassword;
+  }
+
+  const encoder = new TextEncoder();
+
+  // Format 1: salt:base64hash
+  if (storedPassword.includes(':')) {
+    const [salt, expectedHash] = storedPassword.split(':');
     const data = encoder.encode(password + salt);
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
     const computedHash = btoa(String.fromCharCode(...new Uint8Array(hashBuffer)));
-    return computedHash === storedHash;
+    return computedHash === expectedHash;
+  }
+
+  // Format 2 (legacy import/create): base64Salt + base64Hash (concatenated)
+  // 16-byte salt in base64 is 24 chars; SHA-256 hash in base64 is 44 chars.
+  if (storedPassword.length >= 68) {
+    const salt = storedPassword.substring(0, 24);
+    const expectedCombined = storedPassword;
+    const data = encoder.encode(password + salt);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hash = btoa(String.fromCharCode(...new Uint8Array(hashBuffer)));
+    return (salt + hash) === expectedCombined;
   }
 
   return false;
@@ -80,7 +98,7 @@ export async function onRequestPost(context) {
     // Look up player by player_key
     const { data: players, error } = await supabaseQuery(env, 'players', 'GET', {
       select: 'id,player_key,player_name,preferred_name,parent_email,parent_name,player_email,password_hash,profile_image_url,school,city,state,grad_class,gender,primary_position,secondary_position,height,weight,jersey_number,team_names,level,ppg,apg,rpg,verified,payment_status,created_at',
-      eq: { player_key: player_key.toUpperCase() },
+      eq: { player_key: player_key.trim().toUpperCase() },
       limit: 1
     });
 
