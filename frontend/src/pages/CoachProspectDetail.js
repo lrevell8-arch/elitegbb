@@ -14,6 +14,39 @@ import {
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
+const BADGE_LEVELS = {
+  prospect: { label: 'Prospect', color: '#cd7f32' },
+  rising_star: { label: 'Rising Star', color: '#c0c0c0' },
+  elite: { label: 'Elite', color: '#d4af37' },
+  '5ball_recruit': { label: '5Ball Recruit', color: '#e5e4e2' }
+};
+
+const normalizeBadgeLevel = (level) => {
+  if (!level) return 'prospect';
+  const normalized = level.toString().trim().toLowerCase().replace(/\s+/g, '_');
+  if (normalized === '5ball' || normalized === 'fiveball' || normalized === '5_ball') return '5ball_recruit';
+  if (normalized === 'risingstar') return 'rising_star';
+  return normalized;
+};
+
+const getTextColor = (hex) => {
+  const sanitized = hex.replace('#', '');
+  const r = parseInt(sanitized.substring(0, 2), 16);
+  const g = parseInt(sanitized.substring(2, 4), 16);
+  const b = parseInt(sanitized.substring(4, 6), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.7 ? '#111827' : '#ffffff';
+};
+
+const getBadgeMeta = (level) => {
+  const normalized = normalizeBadgeLevel(level);
+  const badge = BADGE_LEVELS[normalized] || BADGE_LEVELS.prospect;
+  return {
+    ...badge,
+    textColor: getTextColor(badge.color)
+  };
+};
+
 export default function CoachProspectDetail() {
   const { playerId } = useParams();
   const { getAuthHeaders } = useCoachAuth();
@@ -132,6 +165,7 @@ export default function CoachProspectDetail() {
   }
 
   const { player, intake } = prospect;
+  const badgeMeta = getBadgeMeta(player?.badge_level);
 
   return (
     <div className="min-h-screen bg-[#0b0b0b]">
@@ -231,6 +265,15 @@ export default function CoachProspectDetail() {
                       )}
                       <Badge className="bg-[#0134bd]/20 text-[#0134bd] border-[#0134bd]/30">
                         Class of {player?.grad_class}
+                      </Badge>
+                      <Badge
+                        style={{
+                          backgroundColor: `${badgeMeta.color}20`,
+                          color: badgeMeta.textColor,
+                          borderColor: `${badgeMeta.color}55`
+                        }}
+                      >
+                        {badgeMeta.label}
                       </Badge>
                     </div>
                   </div>

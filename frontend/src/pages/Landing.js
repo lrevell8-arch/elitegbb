@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Play, ChevronRight, Zap, Target, BarChart3, Users, Shield, Eye, Award, TrendingUp } from 'lucide-react';
+import logo from '../assets/elitegbb-logo.png';
 
 const stats = [
   { value: '5,247', label: 'Athletes', suffix: '+' },
@@ -63,11 +64,8 @@ export default function Landing() {
         <div className="container mx-auto px-6">
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center gap-3 group">
-              <div className="relative w-11 h-11">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#0134bd] to-[#fb6c1d] rounded-xl rotate-6 group-hover:rotate-12 transition-transform duration-300" />
-                <div className="absolute inset-0 bg-[#0b0b0b] rounded-xl flex items-center justify-center">
-                  <span className="text-xl font-black text-elite-gradient">E</span>
-                </div>
+              <div className="w-11 h-11 rounded-xl bg-[#0b0b0b] border border-white/10 flex items-center justify-center overflow-hidden">
+                <img src={logo} alt="EliteGBB logo" className="w-full h-full object-contain" />
               </div>
               <div className="flex flex-col">
                 <span className="text-lg font-bold text-white tracking-tight">EliteGBB</span>
@@ -508,11 +506,8 @@ export default function Landing() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
             <div>
               <Link to="/" className="flex items-center gap-3 mb-6">
-                <div className="relative w-10 h-10">
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#0134bd] to-[#fb6c1d] rounded-lg rotate-6" />
-                  <div className="absolute inset-0 bg-[#0b0b0b] rounded-lg flex items-center justify-center">
-                    <span className="text-lg font-black text-elite-gradient">E</span>
-                  </div>
+                <div className="w-10 h-10 rounded-lg bg-[#0b0b0b] border border-white/10 flex items-center justify-center overflow-hidden">
+                  <img src={logo} alt="EliteGBB logo" className="w-full h-full object-contain" />
                 </div>
                 <span className="text-lg font-bold text-white">EliteGBB</span>
               </Link>

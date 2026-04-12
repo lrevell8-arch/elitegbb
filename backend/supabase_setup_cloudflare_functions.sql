@@ -97,12 +97,12 @@ CREATE POLICY "Allow staff users read access" ON staff_users
 INSERT INTO coaches (id, email, password_hash, name, school, title, state, is_active, is_verified)
 VALUES (
     uuid_generate_v4(),
-    'coach@university.edu',
-    '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewKyNiAYMyzJ/I1W',
-    'Coach Johnson',
-    'University State',
+    'coach@elitegbb.com',
+    'PLAIN:Password123',
+    'Coach Elite',
+    'Elite GBB Academy',
     'Head Coach',
-    'CA',
+    'GA',
     TRUE,
     TRUE
 )

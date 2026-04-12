@@ -15,6 +15,21 @@ const COLORS = {
   lightGray: '#f3f4f6'
 };
 
+const LEVEL_COLORS = {
+  gold: '#d4af37',
+  silver: '#c0c0c0',
+  bronze: '#cd7f32',
+  platinum: '#e5e4e2',
+  burntOrange: '#c65d2a'
+};
+
+const BADGE_LEVELS = {
+  prospect: { label: 'Prospect', color: LEVEL_COLORS.bronze },
+  rising_star: { label: 'Rising Star', color: LEVEL_COLORS.silver },
+  elite: { label: 'Elite', color: LEVEL_COLORS.gold },
+  '5ball_recruit': { label: '5Ball Recruit', color: LEVEL_COLORS.platinum }
+};
+
 // Verify admin token
 async function verifyAdminToken(request, env) {
   const authHeader = request.headers.get('Authorization');
@@ -49,6 +64,36 @@ async function fetchPlayerData(env, playerId) {
   return data?.[0] || null;
 }
 
+function normalizeBadgeLevel(level) {
+  if (!level) return 'prospect';
+  const normalized = level.toString().trim().toLowerCase().replace(/\s+/g, '_');
+  if (normalized === '5ball' || normalized === 'fiveball' || normalized === '5_ball') {
+    return '5ball_recruit';
+  }
+  if (normalized === 'risingstar') {
+    return 'rising_star';
+  }
+  return normalized;
+}
+
+function getTextColor(hex) {
+  const sanitized = hex.replace('#', '');
+  const r = parseInt(sanitized.substring(0, 2), 16);
+  const g = parseInt(sanitized.substring(2, 4), 16);
+  const b = parseInt(sanitized.substring(4, 6), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.7 ? COLORS.black : COLORS.white;
+}
+
+function getBadgeMeta(player) {
+  const badgeLevel = normalizeBadgeLevel(player.badge_level || 'prospect');
+  const badge = BADGE_LEVELS[badgeLevel] || BADGE_LEVELS.prospect;
+  return {
+    ...badge,
+    textColor: getTextColor(badge.color)
+  };
+}
+
 // Generate Player One-Pager HTML (for PDF conversion)
 function generateOnePagerHTML(player) {
   const stats = {
@@ -61,6 +106,7 @@ function generateOnePagerHTML(player) {
     three: player.three_p_percent || 0,
     ft: player.ft_percent || 0
   };
+  const badgeMeta = getBadgeMeta(player);
 
   return `<!DOCTYPE html>
 <html>
@@ -95,13 +141,15 @@ function generateOnePagerHTML(player) {
     }
     .badge {
       display: inline-block;
-      background: ${COLORS.secondary};
-      color: ${COLORS.white};
+      background: ${'${badgeMeta.color}'};
+      color: ${'${badgeMeta.textColor}'};
       padding: 6pt 14pt;
       border-radius: 20pt;
       font-size: 10pt;
-      font-weight: 600;
+      font-weight: 700;
       margin-top: 8pt;
+      letter-spacing: 0.5pt;
+      text-transform: uppercase;
     }
     .section {
       margin-bottom: 16pt;
@@ -197,23 +245,25 @@ function generateOnePagerHTML(player) {
       position: absolute;
       top: 100pt;
       right: 36pt;
-      background: ${COLORS.secondary};
-      color: ${COLORS.white};
+      background: ${'${badgeMeta.color}'};
+      color: ${'${badgeMeta.textColor}'};
       padding: 8pt 16pt;
       border-radius: 6pt;
       font-size: 10pt;
-      font-weight: 700;
+      font-weight: 800;
       transform: rotate(-5deg);
+      text-transform: uppercase;
+      letter-spacing: 0.5pt;
     }
   </style>
 </head>
 <body>
-  ${player.verified ? `<div class="verified-stamp">✓ VERIFIED PROSPECT</div>` : ''}
+  ${player.verified ? `<div class="verified-stamp">✓ ${badgeMeta.label.toUpperCase()} VERIFIED</div>` : ''}
   
   <div class="header">
     <h1>${player.player_name || 'Unknown Player'}</h1>
     <div class="subtitle">${player.primary_position || 'N/A'} | Class of ${player.grad_class || 'N/A'} | ${player.school || 'N/A'}</div>
-    ${player.verified ? `<div class="badge">⭐ Elite Prospect</div>` : ''}
+    <div class="badge">${badgeMeta.label}</div>
   </div>
 
   <div class="section">
@@ -296,6 +346,7 @@ function generateOnePagerHTML(player) {
 function generateTrackingProfileHTML(player) {
   const createdDate = new Date(player.created_at).toLocaleDateString();
   const updatedDate = player.updated_at ? new Date(player.updated_at).toLocaleDateString() : createdDate;
+  const badgeMeta = getBadgeMeta(player);
 
   return `<!DOCTYPE html>
 <html>
@@ -324,14 +375,16 @@ function generateTrackingProfileHTML(player) {
       font-weight: 800;
     }
     .tracking-badge {
-      background: ${COLORS.secondary};
-      color: ${COLORS.white};
+      background: ${'${badgeMeta.color}'};
+      color: ${'${badgeMeta.textColor}'};
       padding: 4pt 10pt;
       border-radius: 4pt;
       font-size: 9pt;
       font-weight: 700;
       display: inline-block;
       margin-top: 6pt;
+      text-transform: uppercase;
+      letter-spacing: 0.5pt;
     }
     .timeline {
       border-left: 3pt solid ${COLORS.primary};
@@ -433,7 +486,7 @@ function generateTrackingProfileHTML(player) {
 <body>
   <div class="header">
     <h1>Tracking Profile: ${player.player_name}</h1>
-    <div class="tracking-badge">ID: ${player.player_key || player.id}</div>
+    <div class="tracking-badge">${badgeMeta.label} • ID: ${player.player_key || player.id}</div>
   </div>
 
   <div class="timeline">
@@ -450,8 +503,8 @@ function generateTrackingProfileHTML(player) {
     ${player.verified ? `
     <div class="timeline-item">
       <div class="timeline-date">${new Date().toLocaleDateString()}</div>
-      <div class="timeline-title">Verified Prospect Status</div>
-      <div style="font-size: 10pt;">Player has been verified as an elite prospect.</div>
+      <div class="timeline-title">${badgeMeta.label} Status</div>
+      <div style="font-size: 10pt;">Player has been verified at the ${badgeMeta.label.toLowerCase()} level.</div>
     </div>
     ` : ''}
   </div>
@@ -541,6 +594,7 @@ function generateFilmIndexHTML(player) {
     { title: 'Full Game vs. Regional', url: 'https://hudl.com/not-set', type: 'Game Film', duration: '32:00' },
     { title: 'Training Session', url: 'https://hudl.com/not-set', type: 'Training', duration: '8:20' }
   ];
+  const badgeMeta = getBadgeMeta(player);
 
   return `<!DOCTYPE html>
 <html>
@@ -702,7 +756,7 @@ function generateFilmIndexHTML(player) {
 <body>
   <div class="header">
     <h1>🎬 Film Index</h1>
-    <div class="player-info">${player.player_name} • ${player.primary_position || 'N/A'} • Class of ${player.grad_class || 'N/A'}</div>
+    <div class="player-info">${player.player_name} • ${player.primary_position || 'N/A'} • Class of ${player.grad_class || 'N/A'} • ${badgeMeta.label}</div>
   </div>
 
   <div class="stats-row">

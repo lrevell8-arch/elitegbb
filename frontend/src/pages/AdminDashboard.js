@@ -32,7 +32,7 @@ export default function AdminDashboard() {
 
   const fetchStats = useCallback(async () => {
     try {
-      const response = await axios.get(`${API_URL}/api/admin/stats`, {
+      const response = await axios.get(`${API_URL}/api/admin/dashboard`, {
         headers: getAuthHeaders()
       });
       setStats(response.data);
@@ -220,7 +220,7 @@ export default function AdminDashboard() {
                     </div>
                     <span className="text-white/50 text-sm">Total Players</span>
                   </div>
-                  <div className="text-4xl font-heading font-bold text-white">{stats?.total_players || 0}</div>
+                  <div className="text-4xl font-heading font-bold text-white">{stats?.overview?.total_players || 0}</div>
                 </div>
 
                 <div className="bg-[#121212] border border-white/10 rounded-xl p-6 card-hover">
@@ -230,7 +230,7 @@ export default function AdminDashboard() {
                     </div>
                     <span className="text-white/50 text-sm">Active Projects</span>
                   </div>
-                  <div className="text-4xl font-heading font-bold text-white">{stats?.total_projects || 0}</div>
+                  <div className="text-4xl font-heading font-bold text-white">{stats?.overview?.active_projects || 0}</div>
                 </div>
 
                 <div className="bg-[#121212] border border-white/10 rounded-xl p-6 card-hover">
@@ -240,7 +240,7 @@ export default function AdminDashboard() {
                     </div>
                     <span className="text-white/50 text-sm">This Week</span>
                   </div>
-                  <div className="text-4xl font-heading font-bold text-white">{stats?.recent_submissions || 0}</div>
+                  <div className="text-4xl font-heading font-bold text-white">{stats?.overview?.recent_submissions || 0}</div>
                 </div>
 
                 <div className="bg-[#121212] border border-white/10 rounded-xl p-6 card-hover">
@@ -251,7 +251,7 @@ export default function AdminDashboard() {
                     <span className="text-white/50 text-sm">Delivered</span>
                   </div>
                   <div className="text-4xl font-heading font-bold text-white">
-                    {stats?.projects_by_status?.delivered || 0}
+                    {stats?.overview?.completed_projects || 0}
                   </div>
                 </div>
               </div>
@@ -268,29 +268,29 @@ export default function AdminDashboard() {
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                   <StatusCard 
-                    status="Requested" 
-                    count={stats?.projects_by_status?.requested || 0} 
+                    status="Pending" 
+                    count={stats?.projects?.pending || 0} 
+                    color="text-amber-400" 
+                  />
+                  <StatusCard 
+                    status="In Progress" 
+                    count={stats?.projects?.in_progress || 0} 
                     color="text-blue-400" 
                   />
                   <StatusCard 
-                    status="In Review" 
-                    count={stats?.projects_by_status?.in_review || 0} 
-                    color="text-yellow-400" 
-                  />
-                  <StatusCard 
-                    status="Drafting" 
-                    count={stats?.projects_by_status?.drafting || 0} 
+                    status="Review" 
+                    count={stats?.projects?.review || 0} 
                     color="text-purple-400" 
                   />
                   <StatusCard 
-                    status="Design" 
-                    count={stats?.projects_by_status?.design || 0} 
-                    color="text-pink-400" 
+                    status="Completed" 
+                    count={stats?.projects?.completed || 0} 
+                    color="text-green-400" 
                   />
                   <StatusCard 
-                    status="Delivered" 
-                    count={stats?.projects_by_status?.delivered || 0} 
-                    color="text-green-400" 
+                    status="Cancelled" 
+                    count={stats?.projects?.cancelled || 0} 
+                    color="text-red-400" 
                   />
                 </div>
               </div>

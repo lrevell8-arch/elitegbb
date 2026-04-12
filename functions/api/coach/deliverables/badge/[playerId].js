@@ -13,6 +13,33 @@ const COLORS = {
   gold: '#ffd700'
 };
 
+const LEVEL_COLORS = {
+  gold: '#d4af37',
+  silver: '#c0c0c0',
+  bronze: '#cd7f32',
+  platinum: '#e5e4e2',
+  burntOrange: '#c65d2a'
+};
+
+const BADGE_LEVELS = {
+  prospect: {
+    label: 'Prospect',
+    color: LEVEL_COLORS.bronze
+  },
+  rising_star: {
+    label: 'Rising Star',
+    color: LEVEL_COLORS.silver
+  },
+  elite: {
+    label: 'Elite',
+    color: LEVEL_COLORS.gold
+  },
+  '5ball_recruit': {
+    label: '5Ball Recruit',
+    color: LEVEL_COLORS.platinum
+  }
+};
+
 // Verify coach token
 async function verifyCoachToken(request, env) {
   const authHeader = request.headers.get('Authorization');
@@ -69,14 +96,38 @@ async function checkCoachAccess(env, coachId, playerId) {
   return true;
 }
 
+function normalizeBadgeLevel(level) {
+  if (!level) return 'prospect';
+  const normalized = level.toString().trim().toLowerCase().replace(/\s+/g, '_');
+  if (normalized === '5ball' || normalized === 'fiveball' || normalized === '5_ball') {
+    return '5ball_recruit';
+  }
+  if (normalized === 'risingstar') {
+    return 'rising_star';
+  }
+  return normalized;
+}
+
+function getTextColor(hex) {
+  const sanitized = hex.replace('#', '');
+  const r = parseInt(sanitized.substring(0, 2), 16);
+  const g = parseInt(sanitized.substring(2, 4), 16);
+  const b = parseInt(sanitized.substring(4, 6), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.7 ? COLORS.black : COLORS.white;
+}
+
 // Generate SVG badge
-function generateBadgeSVG(player) {
+function generateBadgeSVG(player, badgeMeta) {
   const width = 400;
   const height = 400;
   const playerName = (player.player_name || 'Unknown Player').toUpperCase();
   const year = player.grad_class || new Date().getFullYear();
   const position = player.primary_position || 'BASKETBALL';
   const verified = player.verified === true;
+  const levelLabel = (badgeMeta?.label || 'Prospect').toUpperCase();
+  const levelColor = badgeMeta?.color || LEVEL_COLORS.bronze;
+  const levelTextColor = getTextColor(levelColor);
 
   // Create star burst path for background
   const starPoints = [];
@@ -120,8 +171,10 @@ function generateBadgeSVG(player) {
   <circle cx="200" cy="200" r="170" fill="none" stroke="url(#goldGradient)" stroke-width="4"/>
   <circle cx="200" cy="200" r="160" fill="none" stroke="${COLORS.secondary}" stroke-width="2" stroke-dasharray="10,5"/>
   
-  <path d="M 60 80 Q 200 40 340 80 L 340 120 Q 200 80 60 120 Z" fill="${COLORS.secondary}"/>
-  <text x="200" y="108" font-family="Arial Black, sans-serif" font-size="24" font-weight="800" fill="${COLORS.white}" text-anchor="middle" letter-spacing="4">ELITE</text>
+  <path d="M 60 80 Q 200 40 340 80 L 340 120 Q 200 80 60 120 Z" fill="${levelColor}"/>
+  <text x="200" y="108" font-family="Arial Black, sans-serif" font-size="22" font-weight="800" fill="${levelTextColor}" text-anchor="middle" letter-spacing="2">${levelLabel}</text>
+  <line x1="110" y1="130" x2="290" y2="130" stroke="${levelColor}" stroke-width="2" opacity="0.8" />
+  <text x="200" y="150" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="${levelTextColor}" text-anchor="middle" letter-spacing="3">${year}</text>
   
   <circle cx="200" cy="200" r="130" fill="${COLORS.white}"/>
   
@@ -152,7 +205,7 @@ function generateBadgeSVG(player) {
   ` : ''}
   
   <text x="200" y="340" font-family="Arial, sans-serif" font-size="10" font-weight="600" fill="${COLORS.white}" text-anchor="middle" opacity="0.9">
-    ${verified ? '✓ VERIFIED PROSPECT' : 'PENDING VERIFICATION'}
+    ${verified ? `✓ ${levelLabel} VERIFIED` : `${levelLabel} LEVEL`}
   </text>
   
   <text x="200" y="375" font-family="monospace" font-size="9" fill="${COLORS.white}" text-anchor="middle" opacity="0.7">
@@ -213,15 +266,19 @@ export async function onRequestGet(context) {
       );
     }
 
+    const levelParam = url.searchParams.get('level');
+    const badgeLevel = normalizeBadgeLevel(levelParam || player.badge_level || 'prospect');
+    const badgeMeta = BADGE_LEVELS[badgeLevel] || BADGE_LEVELS.prospect;
+
     // Generate badge
-    const svg = generateBadgeSVG(player);
+    const svg = generateBadgeSVG(player, badgeMeta);
 
     // Return based on requested format
     if (format === 'html') {
       const html = `<!DOCTYPE html>
 <html>
 <head>
-  <title>Verified Prospect Badge - ${player.player_name}</title>
+  <title>${badgeMeta.label} Badge - ${player.player_name}</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -285,8 +342,8 @@ export async function onRequestGet(context) {
 </head>
 <body>
   <div class="container">
-    <h1>Verified Prospect Badge</h1>
-    <p>${player.player_name} • Class of ${player.grad_class || 'N/A'}</p>
+    <h1>${badgeMeta.label} Badge</h1>
+    <p>${player.player_name} • ${badgeMeta.label} • Class of ${player.grad_class || 'N/A'}</p>
     <div class="badge-container">
       ${svg}
     </div>
@@ -296,7 +353,7 @@ export async function onRequestGet(context) {
     <div class="coach-info">
       <div class="coach-info-title">Coach Information</div>
       <div class="coach-info-text">
-        This player is a verified prospect in the Elite GBB network.<br>
+        This player is a ${badgeMeta.label.toLowerCase()} level prospect in the Elite GBB network.<br>
         Contact HWH at coaches@hoopwithher.com for referrals.
       </div>
     </div>
