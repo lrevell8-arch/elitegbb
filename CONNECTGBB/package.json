@@ -1,13 +1,4 @@
 {
-  "name": "elitegbb-connectgbb-build-root",
-  "version": "1.0.0",
-  "private": true,
-  "description": "Cloudflare Pages root-directory wrapper for legacy CONNECTGBB setting",
-  "scripts": {
-    "build": "cd ../frontend && npm ci --legacy-peer-deps && DISABLE_ESLINT_PLUGIN=true npm run build && rm -rf ../CONNECTGBB/build && cp -R build ../CONNECTGBB/build",
-    "pages:build": "npm run build && npm run verify:artifact",
-    "prepages:build": "node -e \"const fs=require('fs'); const t=fs.readFileSync('wrangler.toml','utf8'); if(!/pages_build_output_dir\\s*=\\s*\\\"build\\\"/.test(t)){console.error('wrangler pages_build_output_dir must be \"build\"'); process.exit(1)}\"",
-    "verify:artifact": "test -f build/index.html"
   "name": "connectgbb",
   "version": "0.1.0",
   "private": true,
