@@ -1,6 +1,6 @@
 """
 Email Provider Abstraction for HWH Player Advantage™
-Supports: mock (default) and ses (AWS SES)
+Supports: mock (default), ses (AWS SES), and smtp.
 """
 import os
 import logging
@@ -8,17 +8,27 @@ from abc import ABC, abstractmethod
 from typing import Optional, Dict, Any
 from datetime import datetime, timezone
 import uuid
+import smtplib
+from email.message import EmailMessage
 
 logger = logging.getLogger(__name__)
 
 # Email provider configuration
-EMAIL_PROVIDER = os.environ.get('EMAIL_PROVIDER', 'mock')  # mock | ses
+EMAIL_PROVIDER = os.environ.get('EMAIL_PROVIDER', 'mock')  # mock | ses | smtp
 
 # AWS SES configuration
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
 AWS_REGION = os.environ.get('AWS_REGION', 'us-east-1')
 SES_FROM_ADDRESS = os.environ.get('SES_FROM_EMAIL', 'noreply@elitegbb.com')
+
+# SMTP configuration (Hostinger-compatible defaults)
+SMTP_HOST = os.environ.get('SMTP_HOST', 'smtp.hostinger.com')
+SMTP_PORT = int(os.environ.get('SMTP_PORT', '465'))
+SMTP_USERNAME = os.environ.get('SMTP_USERNAME')
+SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD')
+SMTP_FROM_ADDRESS = os.environ.get('SMTP_FROM_EMAIL', SMTP_USERNAME or 'noreply@elitegbb.com')
+SMTP_USE_STARTTLS = os.environ.get('SMTP_USE_STARTTLS', 'false').lower() in ('1', 'true', 'yes')
 
 
 class EmailProvider(ABC):
@@ -161,6 +171,75 @@ class SESEmailProvider(EmailProvider):
             }
 
 
+class SMTPEmailProvider(EmailProvider):
+    """SMTP email provider."""
+
+    def __init__(self):
+        if not SMTP_USERNAME or not SMTP_PASSWORD:
+            raise ValueError("SMTP_USERNAME and SMTP_PASSWORD are required for SMTP provider")
+
+        self.host = SMTP_HOST
+        self.port = SMTP_PORT
+        self.username = SMTP_USERNAME
+        self.password = SMTP_PASSWORD
+        self.from_address = SMTP_FROM_ADDRESS
+        self.use_starttls = SMTP_USE_STARTTLS
+
+    async def send_email(
+        self,
+        to_email: str,
+        subject: str,
+        html_body: str,
+        text_body: Optional[str] = None,
+        reply_to: Optional[str] = None,
+        tags: Optional[Dict[str, str]] = None
+    ) -> Dict[str, Any]:
+        """Send email via SMTP."""
+        del tags  # SMTP does not support provider tags natively
+
+        try:
+            message = EmailMessage()
+            message["Subject"] = subject
+            message["From"] = self.from_address
+            message["To"] = to_email
+            if reply_to:
+                message["Reply-To"] = reply_to
+
+            plain = text_body or "This email contains HTML content. Please use an HTML-compatible email client."
+            message.set_content(plain)
+            message.add_alternative(html_body, subtype="html")
+
+            if self.use_starttls:
+                with smtplib.SMTP(self.host, self.port, timeout=30) as server:
+                    server.ehlo()
+                    server.starttls()
+                    server.ehlo()
+                    server.login(self.username, self.password)
+                    server.send_message(message)
+            else:
+                with smtplib.SMTP_SSL(self.host, self.port, timeout=30) as server:
+                    server.login(self.username, self.password)
+                    server.send_message(message)
+
+            message_id = message.get("Message-ID") or f"smtp-{uuid.uuid4()}"
+            logger.info(f"[SMTP] Email sent successfully to {to_email}, MessageId: {message_id}")
+
+            return {
+                "success": True,
+                "message_id": message_id,
+                "provider": "smtp",
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+        except Exception as e:
+            logger.error(f"[SMTP] Failed to send email to {to_email}: {str(e)}")
+            return {
+                "success": False,
+                "error": str(e),
+                "provider": "smtp",
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+
+
 def get_email_provider() -> EmailProvider:
     """Factory function to get the configured email provider."""
     if EMAIL_PROVIDER == 'ses':
@@ -168,6 +247,12 @@ def get_email_provider() -> EmailProvider:
             return SESEmailProvider()
         except Exception as e:
             logger.warning(f"Failed to initialize SES provider: {e}. Falling back to mock.")
+            return MockEmailProvider()
+    if EMAIL_PROVIDER == 'smtp':
+        try:
+            return SMTPEmailProvider()
+        except Exception as e:
+            logger.warning(f"Failed to initialize SMTP provider: {e}. Falling back to mock.")
             return MockEmailProvider()
     else:
         return MockEmailProvider()
