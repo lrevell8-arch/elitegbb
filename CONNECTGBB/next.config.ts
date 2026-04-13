@@ -4,11 +4,11 @@ import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 initOpenNextCloudflareForDev();
 
 const nextConfig: NextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true
-  },
   typescript: {
     ignoreBuildErrors: true
+  },
+  experimental: {
+    turbopack: false
   }
 };
 
