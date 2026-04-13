@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "pages:build": "opennextjs-cloudflare build",
+        "pages:build": "opennextjs-cloudflare build && mv .open-next/worker.js .open-next/_worker.js",
     "pages:preview": "npx @opennextjs/cloudflare preview"
   },
   "dependencies": {
