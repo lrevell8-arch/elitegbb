@@ -1,24 +1,16 @@
-// Admin Deliverable Generation Endpoint
+// Admin Project Deliverable Generation Endpoint
 // POST /api/admin/projects/:id/generate/:type
 
 import { verifyJWT } from '../../../../../utils/jwt.js';
 
-const VALID_DELIVERABLE_TYPES = new Set([
-  'one_pager',
-  'tracking_profile',
-  'referral_note',
-  'film_index',
-  'mid_season_update',
-  'end_season_update',
-  'verified_badge'
-]);
-
-const PDF_ROUTE_TYPE_MAP = {
-  one_pager: 'one-pager',
-  tracking_profile: 'tracking-profile',
-  film_index: 'film-index'
+const DELIVERABLE_MAP = {
+  one_pager: { kind: 'pdf', type: 'one-pager' },
+  tracking_profile: { kind: 'pdf', type: 'tracking-profile' },
+  film_index: { kind: 'pdf', type: 'film-index' },
+  verified_badge: { kind: 'badge' }
 };
 
+// Supabase REST API helper
 async function supabaseQuery(env, table, method, params = {}) {
   const url = `${env.SUPABASE_URL}/rest/v1/${table}`;
   const headers = {
@@ -35,7 +27,6 @@ async function supabaseQuery(env, table, method, params = {}) {
       queryParams.append(key, `eq.${value}`);
     });
   }
-  if (params.order) queryParams.append('order', params.order);
 
   const fullUrl = queryParams.toString() ? `${url}?${queryParams.toString()}` : url;
 
@@ -54,6 +45,7 @@ async function supabaseQuery(env, table, method, params = {}) {
   return { data, error: null };
 }
 
+// Verify admin token
 async function verifyAdminToken(request, env) {
   const authHeader = request.headers.get('Authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -67,79 +59,9 @@ async function verifyAdminToken(request, env) {
       return { valid: false, error: 'Insufficient permissions' };
     }
     return { valid: true, user: payload };
-  } catch {
+  } catch (err) {
     return { valid: false, error: 'Invalid token' };
   }
-}
-
-function buildDeliverableUrl(requestUrl, deliverableType, playerId, projectId) {
-  const origin = new URL(requestUrl).origin;
-
-  if (deliverableType === 'verified_badge') {
-    return `${origin}/api/admin/deliverables/badge/${playerId}?format=png`;
-  }
-
-  if (PDF_ROUTE_TYPE_MAP[deliverableType]) {
-    return `${origin}/api/admin/deliverables/pdf/${PDF_ROUTE_TYPE_MAP[deliverableType]}/${playerId}`;
-  }
-
-  // Placeholder for deliverables that do not yet have a dedicated renderer route
-  return `${origin}/mock-deliverables/${projectId}/${deliverableType}.pdf`;
-}
-
-async function upsertDeliverable(env, existing, payload) {
-  if (existing?.id) {
-    const { data, error } = await supabaseQuery(env, 'deliverables', 'PATCH', {
-      select: '*',
-      eq: { id: existing.id },
-      body: {
-        status: payload.status,
-        file_url: payload.file_url,
-        updated_at: payload.updated_at,
-        delivered_at: payload.delivered_at
-      }
-    });
-
-    return { data: data?.[0] || null, error };
-  }
-
-  const typeFirstBody = {
-    project_id: payload.project_id,
-    type: payload.type,
-    status: payload.status,
-    file_url: payload.file_url,
-    notes: payload.notes,
-    created_at: payload.created_at,
-    updated_at: payload.updated_at,
-    delivered_at: payload.delivered_at
-  };
-
-  const typeInsert = await supabaseQuery(env, 'deliverables', 'POST', {
-    select: '*',
-    body: typeFirstBody
-  });
-
-  if (!typeInsert.error) {
-    return { data: typeInsert.data?.[0] || null, error: null };
-  }
-
-  const legacyBody = {
-    project_id: payload.project_id,
-    deliverable_type: payload.type,
-    status: payload.status,
-    file_url: payload.file_url,
-    notes: payload.notes,
-    created_at: payload.created_at,
-    updated_at: payload.updated_at,
-    delivered_at: payload.delivered_at
-  };
-
-  const legacyInsert = await supabaseQuery(env, 'deliverables', 'POST', {
-    select: '*',
-    body: legacyBody
-  });
-
-  return { data: legacyInsert.data?.[0] || null, error: legacyInsert.error };
 }
 
 export async function onRequestPost(context) {
@@ -147,19 +69,20 @@ export async function onRequestPost(context) {
   const projectId = params.id;
   const deliverableType = params.type;
 
-  if (!VALID_DELIVERABLE_TYPES.has(deliverableType)) {
-    return new Response(
-      JSON.stringify({ detail: 'Invalid deliverable type' }),
-      { status: 400, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
-    );
-  }
-
   try {
     const auth = await verifyAdminToken(request, env);
     if (!auth.valid) {
+      return new Response(JSON.stringify({ detail: auth.error }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    const config = DELIVERABLE_MAP[deliverableType];
+    if (!config) {
       return new Response(
-        JSON.stringify({ detail: auth.error }),
-        { status: 401, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
+        JSON.stringify({ detail: 'Deliverable type not supported yet.' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
@@ -168,68 +91,81 @@ export async function onRequestPost(context) {
       eq: { id: projectId }
     });
 
-    if (projectError || !projects?.length) {
+    if (projectError) {
+      return new Response(
+        JSON.stringify({ detail: 'Failed to fetch project', error: projectError.message }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (!projects || projects.length === 0) {
       return new Response(
         JSON.stringify({ detail: 'Project not found' }),
-        { status: 404, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
+        { status: 404, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
-    const project = projects[0];
+    const playerId = projects[0].player_id;
+    const origin = new URL(request.url).origin;
+
+    let fileUrl = '';
+    if (config.kind === 'pdf') {
+      fileUrl = `${origin}/api/admin/deliverables/pdf/${config.type}/${playerId}`;
+    } else if (config.kind === 'badge') {
+      fileUrl = `${origin}/api/admin/deliverables/badge/${playerId}`;
+    }
+
     const now = new Date().toISOString();
-    const generatedFileUrl = buildDeliverableUrl(request.url, deliverableType, project.player_id, projectId);
-
-    const { data: currentDeliverables, error: currentError } = await supabaseQuery(env, 'deliverables', 'GET', {
+    const { data: updated, error: updateError } = await supabaseQuery(env, 'deliverables', 'PATCH', {
       select: '*',
-      eq: { project_id: projectId }
+      eq: { project_id: projectId, deliverable_type: deliverableType },
+      body: {
+        status: 'complete',
+        file_url: fileUrl,
+        updated_at: now
+      }
     });
 
-    if (currentError) {
+    if (updateError) {
       return new Response(
-        JSON.stringify({ detail: 'Failed to load project deliverables', error: currentError.message }),
-        { status: 500, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
+        JSON.stringify({ detail: 'Failed to update deliverable', error: updateError.message }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
-    const existing = (currentDeliverables || []).find((d) => {
-      const dbType = d.deliverable_type || d.type;
-      return dbType === deliverableType;
-    });
+    let deliverable = updated?.[0] || null;
 
-    const { data: saved, error: upsertError } = await upsertDeliverable(env, existing, {
-      project_id: projectId,
-      type: deliverableType,
-      status: 'delivered',
-      file_url: generatedFileUrl,
-      notes: `[AUTO-GENERATED] ${deliverableType} requested by ${auth.user.email || auth.user.sub || 'admin'}`,
-      created_at: now,
-      updated_at: now,
-      delivered_at: now
-    });
+    if (!deliverable) {
+      const { data: created, error: createError } = await supabaseQuery(env, 'deliverables', 'POST', {
+        select: '*',
+        body: {
+          project_id: projectId,
+          deliverable_type: deliverableType,
+          status: 'complete',
+          file_url: fileUrl,
+          created_at: now,
+          updated_at: now
+        }
+      });
 
-    if (upsertError) {
-      return new Response(
-        JSON.stringify({ detail: 'Failed to save generated deliverable', error: upsertError.message }),
-        { status: 500, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
-      );
+      if (createError) {
+        return new Response(
+          JSON.stringify({ detail: 'Failed to create deliverable', error: createError.message }),
+          { status: 500, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
+      deliverable = created?.[0] || null;
     }
 
     return new Response(
-      JSON.stringify({
-        success: true,
-        project_id: projectId,
-        deliverable_type: deliverableType,
-        status: 'complete',
-        file_url: generatedFileUrl,
-        deliverable: saved || null,
-        message: `${deliverableType} generated successfully`
-      }),
+      JSON.stringify({ success: true, file_url: fileUrl, deliverable }),
       { status: 200, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
     );
   } catch (err) {
     return new Response(
-      JSON.stringify({ detail: 'Error generating deliverable', error: err.message }),
-      { status: 500, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
+      JSON.stringify({ detail: 'Error: ' + err.message }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
 }

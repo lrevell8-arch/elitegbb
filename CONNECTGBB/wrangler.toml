@@ -1,18 +1,14 @@
-name = "elitegbb-app"
-compatibility_date = "2024-01-01"
+name = "connectgbb"
+compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 
-# Cloudflare Pages configuration when project root is set to CONNECTGBB
-pages_build_output_dir = "build"
+pages_build_output_dir = ".open-next"
 
 [vars]
 SUPABASE_URL = "https://srrasrbsqajtssqlxoju.supabase.co"
-NPM_FLAGS = "--legacy-peer-deps"
 
 [env.production.vars]
 SUPABASE_URL = "https://srrasrbsqajtssqlxoju.supabase.co"
-NPM_FLAGS = "--legacy-peer-deps"
 
 [env.preview.vars]
 SUPABASE_URL = "https://srrasrbsqajtssqlxoju.supabase.co"
-NPM_FLAGS = "--legacy-peer-deps"

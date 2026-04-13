@@ -11,7 +11,7 @@ const SAMPLE_PLAYERS = [
     grad_class: "2028",
     gender: "female",
     dob: "2012-03-15",
-    school: "Lincoln Middle School",
+    school: "Lincoln Academy",
     city: "Atlanta",
     state: "GA",
     primary_position: "PG",
@@ -22,6 +22,8 @@ const SAMPLE_PLAYERS = [
     parent_email: "angela.johnson@example.com",
     parent_phone: "404-555-0123",
     player_email: "maya.johnson.test@example.com",
+    level: "prospect",
+    verified: true,
     instagram_handle: "@mayajohnson2028"
   },
   {
@@ -41,6 +43,8 @@ const SAMPLE_PLAYERS = [
     parent_email: "marcus.williams@example.com",
     parent_phone: "713-555-0456",
     player_email: "sophia.williams.test@example.com",
+    level: "rising_star",
+    verified: true,
     instagram_handle: "@sophiaw2029"
   },
   {
@@ -60,6 +64,8 @@ const SAMPLE_PLAYERS = [
     parent_email: "carlos.martinez@example.com",
     parent_phone: "312-555-0789",
     player_email: "zoe.martinez.test@example.com",
+    level: "elite",
+    verified: true,
     instagram_handle: "@zoem2027"
   },
   {
@@ -68,7 +74,7 @@ const SAMPLE_PLAYERS = [
     grad_class: "2029",
     gender: "female",
     dob: "2013-05-30",
-    school: "Jefferson Middle School",
+    school: "Jefferson Academy",
     city: "Los Angeles",
     state: "CA",
     primary_position: "PG",
@@ -79,6 +85,8 @@ const SAMPLE_PLAYERS = [
     parent_email: "jennifer.thompson@example.com",
     parent_phone: "323-555-0321",
     player_email: "ava.thompson.test@example.com",
+    level: "5ball_recruit",
+    verified: true,
     instagram_handle: "@avathompson2029"
   },
   {
@@ -98,6 +106,8 @@ const SAMPLE_PLAYERS = [
     parent_email: "david.chen@example.com",
     parent_phone: "206-555-0654",
     player_email: "isabella.chen.test@example.com",
+    level: "prospect",
+    verified: true,
     instagram_handle: "@isabellachen2028"
   }
 ];

@@ -4,6 +4,20 @@
 -- https://app.supabase.com/project/_/sql/new
 -- ============================================================================
 
+-- Add password_hash column if it doesn't exist
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'coaches' AND column_name = 'password_hash'
+    ) THEN
+        ALTER TABLE coaches ADD COLUMN password_hash TEXT;
+        RAISE NOTICE 'Added password_hash column to coaches table';
+    ELSE
+        RAISE NOTICE 'password_hash column already exists';
+    END IF;
+END $$;
+
 -- Add is_verified column if it doesn't exist
 DO $$
 BEGIN
@@ -59,6 +73,19 @@ BEGIN
         RAISE NOTICE 'saved_players column already exists';
     END IF;
 END $$;
+
+-- Seed a test coach account if none exist
+INSERT INTO coaches (email, password_hash, name, school, title, state, is_active, is_verified)
+SELECT
+    'coach@elitegbb.com',
+    'PLAIN:Password123',
+    'Coach Elite',
+    'Elite GBB Academy',
+    'Head Coach',
+    'GA',
+    TRUE,
+    TRUE
+WHERE NOT EXISTS (SELECT 1 FROM coaches);
 
 -- Refresh the schema cache (important for PostgREST)
 NOTIFY pgrst, 'reload schema';

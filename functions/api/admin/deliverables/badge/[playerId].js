@@ -13,6 +13,63 @@ const COLORS = {
   gold: '#ffd700'
 };
 
+const LEVEL_COLORS = {
+  gold: '#d4af37',
+  silver: '#c0c0c0',
+  bronze: '#cd7f32',
+  platinum: '#e5e4e2',
+  burntOrange: '#c65d2a'
+};
+
+const BADGE_LEVELS = {
+  prospect: {
+    label: 'Prospect',
+    color: LEVEL_COLORS.bronze,
+    imageUrl: 'https://www.genspark.ai/api/files/s/g3Bpoo6d'
+  },
+  rising_star: {
+    label: 'Rising Star',
+    color: LEVEL_COLORS.silver,
+    imageUrl: 'https://www.genspark.ai/api/files/s/LxlOjyKZ'
+  },
+  elite: {
+    label: 'Elite',
+    color: LEVEL_COLORS.gold,
+    imageUrl: 'https://www.genspark.ai/api/files/s/EO2JhGE9'
+  },
+  '5ball_recruit': {
+    label: '5Ball Recruit',
+    color: LEVEL_COLORS.platinum,
+    imageUrl: 'https://www.genspark.ai/api/files/s/6Db3Nqi0'
+  },
+  rising_star_orange: {
+    label: 'Rising Star',
+    color: LEVEL_COLORS.burntOrange,
+    imageUrl: 'https://www.genspark.ai/api/files/s/t4B4QvC3'
+  }
+};
+
+function normalizeBadgeLevel(level) {
+  if (!level) return 'prospect';
+  const normalized = level.toString().trim().toLowerCase().replace(/\s+/g, '_');
+  if (normalized === '5ball' || normalized === 'fiveball' || normalized === '5_ball') {
+    return '5ball_recruit';
+  }
+  if (normalized === 'risingstar') {
+    return 'rising_star';
+  }
+  return normalized;
+}
+
+function getTextColor(hex) {
+  const sanitized = hex.replace('#', '');
+  const r = parseInt(sanitized.substring(0, 2), 16);
+  const g = parseInt(sanitized.substring(2, 4), 16);
+  const b = parseInt(sanitized.substring(4, 6), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.7 ? COLORS.black : COLORS.white;
+}
+
 // Verify admin token
 async function verifyAdminToken(request, env) {
   const authHeader = request.headers.get('Authorization');
@@ -48,13 +105,16 @@ async function fetchPlayerData(env, playerId) {
 }
 
 // Generate SVG badge (which can be converted to PNG by the client or returned as SVG)
-function generateBadgeSVG(player) {
+function generateBadgeSVG(player, badgeMeta) {
   const width = 400;
   const height = 400;
   const playerName = (player.player_name || 'Unknown Player').toUpperCase();
   const year = player.grad_class || new Date().getFullYear();
   const position = player.primary_position || 'BASKETBALL';
   const verified = player.verified === true;
+  const levelLabel = (badgeMeta?.label || 'Prospect').toUpperCase();
+  const levelColor = badgeMeta?.color || LEVEL_COLORS.bronze;
+  const levelTextColor = getTextColor(levelColor);
 
   // Create star burst path for background
   const starPoints = [];
@@ -110,9 +170,11 @@ function generateBadgeSVG(player) {
   <!-- Secondary accent ring -->
   <circle cx="200" cy="200" r="160" fill="none" stroke="${COLORS.secondary}" stroke-width="2" stroke-dasharray="10,5"/>
   
-  <!-- Top banner with ELITE text -->
-  <path d="M 60 80 Q 200 40 340 80 L 340 120 Q 200 80 60 120 Z" fill="${COLORS.secondary}"/>
-  <text x="200" y="108" font-family="Arial Black, sans-serif" font-size="24" font-weight="800" fill="${COLORS.white}" text-anchor="middle" letter-spacing="4">ELITE</text>
+  <!-- Top banner with level text -->
+  <path d="M 60 80 Q 200 40 340 80 L 340 120 Q 200 80 60 120 Z" fill="${levelColor}"/>
+  <text x="200" y="108" font-family="Arial Black, sans-serif" font-size="22" font-weight="800" fill="${levelTextColor}" text-anchor="middle" letter-spacing="2">${levelLabel}</text>
+  <line x1="110" y1="130" x2="290" y2="130" stroke="${levelColor}" stroke-width="2" opacity="0.8" />
+  <text x="200" y="150" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="${levelTextColor}" text-anchor="middle" letter-spacing="3">${year}</text>
   
   <!-- Main content area -->
   <circle cx="200" cy="200" r="130" fill="${COLORS.white}"/>
@@ -151,7 +213,7 @@ function generateBadgeSVG(player) {
   
   <!-- Bottom verification text -->
   <text x="200" y="340" font-family="Arial, sans-serif" font-size="10" font-weight="600" fill="${COLORS.white}" text-anchor="middle" opacity="0.9">
-    ${verified ? '✓ VERIFIED PROSPECT' : 'PENDING VERIFICATION'}
+    ${verified ? `✓ ${levelLabel} VERIFIED` : `${levelLabel} LEVEL`}
   </text>
   
   <!-- Serial number -->
@@ -170,12 +232,15 @@ function generateBadgeSVG(player) {
 }
 
 // Generate smaller compact badge variant (for email signatures, etc.)
-function generateCompactBadgeSVG(player) {
+function generateCompactBadgeSVG(player, badgeMeta) {
   const width = 300;
   const height = 120;
   const playerName = player.player_name || 'Unknown Player';
   const year = player.grad_class || new Date().getFullYear();
   const verified = player.verified === true;
+  const levelLabel = (badgeMeta?.label || 'Prospect').toUpperCase();
+  const levelColor = badgeMeta?.color || LEVEL_COLORS.bronze;
+  const levelTextColor = getTextColor(levelColor);
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
@@ -193,17 +258,17 @@ function generateCompactBadgeSVG(player) {
   <rect x="5" y="5" width="290" height="110" rx="15" ry="15" fill="url(#badgeGrad)" filter="url(#dropShadow)"/>
   
   <!-- Left accent -->
-  <rect x="5" y="5" width="8" height="110" rx="8" fill="${COLORS.secondary}"/>
+  <rect x="5" y="5" width="8" height="110" rx="8" fill="${levelColor}"/>
   
   <!-- Basketball icon -->
   <g transform="translate(45, 60)">
-    <circle cx="0" cy="0" r="30" fill="${COLORS.secondary}"/>
+    <circle cx="0" cy="0" r="30" fill="${levelColor}"/>
     <path d="M -30 0 Q 0 0 30 0" fill="none" stroke="${COLORS.black}" stroke-width="2"/>
     <path d="M 0 -30 Q 0 0 0 30" fill="none" stroke="${COLORS.black}" stroke-width="2"/>
   </g>
   
   <!-- Text content -->
-  <text x="90" y="40" font-family="Arial Black, sans-serif" font-size="14" font-weight="800" fill="${COLORS.secondary}" letter-spacing="2">ELITE GBB</text>
+  <text x="90" y="35" font-family="Arial Black, sans-serif" font-size="12" font-weight="800" fill="${levelColor}" letter-spacing="1">${levelLabel} • ELITE GBB</text>
   
   <text x="90" y="65" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="${COLORS.white}">
     ${playerName.substring(0, 20)}${playerName.length > 20 ? '...' : ''}
@@ -259,8 +324,13 @@ export async function onRequestGet(context) {
       );
     }
 
+    const levelParam = url.searchParams.get('level');
+    const badgeLevel = normalizeBadgeLevel(levelParam || player.badge_level || 'prospect');
+    const badge = BADGE_LEVELS[badgeLevel] || BADGE_LEVELS.prospect;
+    const gradYear = player.grad_class || 'N/A';
+
     // Generate badge
-    const svg = variant === 'compact' ? generateCompactBadgeSVG(player) : generateBadgeSVG(player);
+    const svg = variant === 'compact' ? generateCompactBadgeSVG(player, badge) : generateBadgeSVG(player, badge);
 
     // Check if JSON response is requested (via Accept header or explicit json param)
     const acceptHeader = request.headers.get('Accept') || '';
@@ -272,10 +342,10 @@ export async function onRequestGet(context) {
       const html = `<!DOCTYPE html>
 <html>
 <head>
-  <title>Verified Prospect Badge - ${player.player_name}</title>
+  <title>${badge.label} Badge - ${player.player_name}</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Inter', 'Montserrat', Arial, sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -290,8 +360,15 @@ export async function onRequestGet(context) {
       border-radius: 16px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     }
-    .badge-container {
-      margin: 20px 0;
+    .badge-frame {
+      position: relative;
+      width: 360px;
+      margin: 20px auto 10px;
+    }
+    .badge-frame svg {
+      width: 100%;
+      height: auto;
+      display: block;
     }
     .download-btn {
       display: inline-block;
@@ -318,9 +395,9 @@ export async function onRequestGet(context) {
 </head>
 <body>
   <div class="container">
-    <h1>Verified Prospect Badge</h1>
-    <p>${player.player_name} • Class of ${player.grad_class || 'N/A'}</p>
-    <div class="badge-container">
+    <h1>${badge.label} Badge</h1>
+    <p>${player.player_name} • ${badge.label} • ${gradYear}</p>
+    <div class="badge-frame">
       ${svg}
     </div>
     <a href="data:image/svg+xml;base64,${btoa(svg)}" download="${player.player_name?.replace(/\s+/g, '_') || 'Player'}_Badge.svg" class="download-btn">
