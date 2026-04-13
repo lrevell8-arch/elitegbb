@@ -61,6 +61,8 @@ export async function onRequestGet(context) {
         },
         environment: {
           supabase_url_configured: !!env.SUPABASE_URL,
+          supabase_anon_key_configured: !!env.SUPABASE_ANON_KEY,
+          supabase_service_role_key_configured: !!env.SUPABASE_SERVICE_ROLE_KEY,
           jwt_secret_configured: !!env.JWT_SECRET
         }
       }),

@@ -117,6 +117,19 @@ export async function onRequestGet(context) {
       order: 'scheduled_date.asc'
     });
 
+    const normalizedDeliverables = (deliverables || []).map((d) => {
+      const normalizedType = d.deliverable_type || d.type || null;
+      const rawStatus = d.status || 'pending';
+      const normalizedStatus = rawStatus === 'delivered' ? 'complete' : rawStatus;
+
+      return {
+        ...d,
+        deliverable_type: normalizedType,
+        type: d.type || normalizedType,
+        status: normalizedStatus
+      };
+    });
+
     // Build the complete response
     const response = {
       id: project.id,
@@ -131,7 +144,7 @@ export async function onRequestGet(context) {
       completed_at: project.completed_at,
       player: project.players || null,
       intake_submission: intakeSubmissions && intakeSubmissions.length > 0 ? intakeSubmissions[0] : null,
-      deliverables: deliverables || [],
+      deliverables: normalizedDeliverables,
       reminders: reminders || []
     };
 

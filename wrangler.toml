@@ -16,12 +16,15 @@ pages_build_output_dir = "frontend/build"
 # Non-sensitive environment variables
 [vars]
 SUPABASE_URL = "https://srrasrbsqajtssqlxoju.supabase.co"
+NPM_FLAGS = "--legacy-peer-deps"
 
 [env.production.vars]
 SUPABASE_URL = "https://srrasrbsqajtssqlxoju.supabase.co"
+NPM_FLAGS = "--legacy-peer-deps"
 
 [env.preview.vars]
 SUPABASE_URL = "https://srrasrbsqajtssqlxoju.supabase.co"
+NPM_FLAGS = "--legacy-peer-deps"
 
 # ============================================================================
 # SECRETS (Set via Wrangler CLI - NOT in this file!)

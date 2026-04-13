@@ -57,7 +57,7 @@
   },
   "scripts": {
     "start": "craco start",
-    "build": "craco build",
+    "build": "craco build && rm -rf ../CONNECTGBB/build && cp -R build ../CONNECTGBB/build",
     "test": "craco test"
   },
   "browserslist": {
