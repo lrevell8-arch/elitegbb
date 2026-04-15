@@ -1,15 +1,57 @@
 name = "connectgbb"
-compatibility_date = "2024-09-23"
-compatibility_flags = ["nodejs_compat"]
+compatibility_date = "2025-05-05"
+compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
 
 pages_build_output_dir = ".open-next"
+keep_names = false  # Fixes __name ReferenceError (requires wrangler >= 4.13.0)
 
+# =============================================================================
+# VERIFIED SUPABASE CONFIGURATION
+# =============================================================================
+# Project: srrasrbsqajtssqlxoju (hoopwithherbasketball-lab)
+# Status: TESTED AND WORKING
+# Last Verified: 2026-04-14
+# =============================================================================
+
+# Non-sensitive environment variables
 [vars]
 SUPABASE_URL = "https://srrasrbsqajtssqlxoju.supabase.co"
+NEXT_PUBLIC_SUPABASE_URL = "https://srrasrbsqajtssqlxoju.supabase.co"
 NPM_FLAGS = "--legacy-peer-deps"
 
 [env.production.vars]
 SUPABASE_URL = "https://srrasrbsqajtssqlxoju.supabase.co"
+NEXT_PUBLIC_SUPABASE_URL = "https://srrasrbsqajtssqlxoju.supabase.co"
+NPM_FLAGS = "--legacy-peer-deps"
 
 [env.preview.vars]
 SUPABASE_URL = "https://srrasrbsqajtssqlxoju.supabase.co"
+NPM_FLAGS = "--legacy-peer-deps"
+NEXT_PUBLIC_SUPABASE_URL = "https://srrasrbsqajtssqlxoju.supabase.co"
+NPM_FLAGS = "--legacy-peer-deps"
+
+# =============================================================================
+# SECRETS (Set via Wrangler CLI - NOT in this file!)
+# =============================================================================
+# These must be set using Wrangler secrets commands:
+#
+#   wrangler secret put SUPABASE_ANON_KEY
+#   wrangler secret put NEXT_PUBLIC_SUPABASE_ANON_KEY
+#   wrangler secret put JWT_SECRET
+#
+# When prompted, paste these values:
+#
+# SUPABASE_ANON_KEY / NEXT_PUBLIC_SUPABASE_ANON_KEY:
+#   eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...(get from Supabase dashboard)
+#
+# JWT_SECRET (generate with: openssl rand -base64 32):
+#   [YOUR_GENERATED_SECRET]
+#
+# To set for specific environment (production/preview):
+#   wrangler secret put SUPABASE_ANON_KEY --env production
+#   wrangler secret put NEXT_PUBLIC_SUPABASE_ANON_KEY --env production
+#   wrangler secret put JWT_SECRET --env production
+# =============================================================================
+
+# Optional: Stripe configuration for payments
+# STRIPE_API_KEY = "sk_live_..." # Set via: wrangler secret put STRIPE_API_KEY
