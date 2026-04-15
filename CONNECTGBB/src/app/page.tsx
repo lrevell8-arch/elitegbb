@@ -52,6 +52,7 @@ const uiModules = [
     description:
       "Global nav, role-aware menus, and responsive content shells shared by public, member, coach, and admin areas.",
     routes: ["/", "/dashboard", "/coach", "/admin"],
+    deliverables: ["Primary nav", "Role guard states", "Shared page shells"],
     status: "Implemented",
   },
   {
@@ -59,6 +60,7 @@ const uiModules = [
     description:
       "Authentication touchpoints, role selection, and profile bootstrap forms for player, parent, and coach personas.",
     routes: ["/login", "/onboarding", "/dashboard/profile", "/coach/profile"],
+    deliverables: ["Login/signup", "Role picker", "Profile bootstrap"],
     status: "In Progress",
   },
   {
@@ -66,6 +68,7 @@ const uiModules = [
     description:
       "Coach search patterns, saved shortlists, secure inbox scaffolds, and connections workflows between members.",
     routes: ["/coach/search", "/coach/shortlist", "/coach/messages", "/dashboard/connections"],
+    deliverables: ["Player search filters", "Shortlist actions", "Coach-member inbox"],
     status: "In Progress",
   },
   {
@@ -73,6 +76,7 @@ const uiModules = [
     description:
       "Admin oversight pages and Stripe-connected billing controls with shared UI primitives for secure account management.",
     routes: ["/admin/members", "/admin/moderation", "/admin/reports", "/billing"],
+    deliverables: ["Admin moderation tools", "Reporting dashboards", "Billing management"],
     status: "Scaffolded",
   },
 ];
@@ -82,30 +86,40 @@ const apiIntegrations = [
     domain: "Authentication",
     summary: "Session bootstrapping and role-based guards powered by Supabase auth state.",
     source: "Supabase Auth",
+    path: "/api/auth/*",
+    methods: "GET, POST",
     readiness: "Connected",
   },
   {
     domain: "Profiles + Membership",
     summary: "User profile hydration, onboarding persistence, and member-role metadata reads/writes.",
     source: "Supabase Postgres",
+    path: "/api/profile, /api/onboarding",
+    methods: "GET, POST, PATCH",
     readiness: "Connected",
   },
   {
     domain: "Training + Progress",
     summary: "Workout plans, milestones, and saved-resource mapping for player development tracking.",
     source: "Planned API routes",
+    path: "/api/training, /api/progress",
+    methods: "GET, POST",
     readiness: "Scaffolded",
   },
   {
     domain: "Messaging + Moderation",
     summary: "Coach/member conversations with moderation workflows and report escalation support.",
     source: "Planned API routes",
+    path: "/api/messages, /api/moderation",
+    methods: "GET, POST, PATCH",
     readiness: "Scaffolded",
   },
   {
     domain: "Billing + Access Control",
     summary: "Subscription state sync and gated feature flags for premium memberships.",
     source: "Stripe + server actions",
+    path: "/api/billing, /api/stripe/webhook",
+    methods: "POST",
     readiness: "In Progress",
   },
 ];
@@ -155,8 +169,8 @@ export default function Home() {
             <div>
               <h2 className="text-2xl font-semibold text-white">Routing map for the new experience</h2>
               <p className="mt-2 text-sm text-white/70">
-                Each path below is scaffolded as a placeholder page so we can build UI modules and API
-                integration progressively.
+                Each path below maps to a routed page in the Next.js App Router and now feeds the module and
+                integration roadmap sections underneath.
               </p>
             </div>
             <div className="rounded-full border border-white/10 px-4 py-2 text-xs text-white/60">
@@ -203,6 +217,16 @@ export default function Home() {
                 </div>
                 <p className="mt-3 text-sm text-white/70">{module.description}</p>
                 <ul className="mt-4 flex flex-wrap gap-2">
+                  {module.deliverables.map((deliverable) => (
+                    <li
+                      key={deliverable}
+                      className="rounded-md border border-[#0134bd]/50 bg-[#0134bd]/10 px-2.5 py-1 text-xs text-[#8ba8ff]"
+                    >
+                      {deliverable}
+                    </li>
+                  ))}
+                </ul>
+                <ul className="mt-4 flex flex-wrap gap-2">
                   {module.routes.map((route) => (
                     <li
                       key={route}
@@ -233,6 +257,8 @@ export default function Home() {
                   <th className="px-4 py-3 font-medium">Domain</th>
                   <th className="px-4 py-3 font-medium">Integration</th>
                   <th className="px-4 py-3 font-medium">Source</th>
+                  <th className="px-4 py-3 font-medium">Path</th>
+                  <th className="px-4 py-3 font-medium">Methods</th>
                   <th className="px-4 py-3 font-medium">Status</th>
                 </tr>
               </thead>
@@ -242,6 +268,8 @@ export default function Home() {
                     <td className="px-4 py-3 font-medium text-white">{integration.domain}</td>
                     <td className="px-4 py-3 text-white/70">{integration.summary}</td>
                     <td className="px-4 py-3 text-white/70">{integration.source}</td>
+                    <td className="px-4 py-3 text-white/70">{integration.path}</td>
+                    <td className="px-4 py-3 text-white/70">{integration.methods}</td>
                     <td className="px-4 py-3 text-white/70">{integration.readiness}</td>
                   </tr>
                 ))}
