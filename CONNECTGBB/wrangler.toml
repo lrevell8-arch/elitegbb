@@ -6,6 +6,7 @@ pages_build_output_dir = ".open-next"
 
 [vars]
 SUPABASE_URL = "https://srrasrbsqajtssqlxoju.supabase.co"
+NPM_FLAGS = "--legacy-peer-deps"
 
 [env.production.vars]
 SUPABASE_URL = "https://srrasrbsqajtssqlxoju.supabase.co"
