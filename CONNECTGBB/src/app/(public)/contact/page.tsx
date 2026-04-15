@@ -60,7 +60,7 @@ export default function ContactPage() {
 
   return (
     <div className="space-y-6">
-      <SectionCard title="Contact ConnectGBB" description="Choose the right path and we will route your request to the correct team.">
+      <SectionCard title="Contact ConnectGBB" description="Choose the right path and we will route your request to the proper team.">
         <div className="flex flex-wrap gap-2">
           {contactPaths.map((item) => (
             <button
@@ -83,7 +83,7 @@ export default function ContactPage() {
       ) : null}
 
       {submitted ? (
-        <SectionCard title="Message sent" description="Thank you - our team will follow up shortly." />
+        <SectionCard title="Message sent" description="Thank you — our team will follow up shortly." />
       ) : (
         <SectionCard title="Send a message" description="Please complete the form below.">
           <form onSubmit={handleSubmit(onSubmit)} className="grid gap-3 md:grid-cols-2">

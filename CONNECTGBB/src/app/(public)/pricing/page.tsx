@@ -61,74 +61,86 @@ const faqItems = [
   },
   {
     question: "Is there a coach-only plan?",
-    answer: "Yes, the Coach plan provides scouting tools, shortlisting, and trusted messaging.",
+    answer: "Yes, coaches can subscribe to scouting and communication-focused tools.",
+  },
+  {
+    question: "Do families need separate accounts?",
+    answer: "Family workflows are supported through role-aware account setup.",
+  },
+  {
+    question: "Where do I manage billing?",
+    answer: "Billing is managed from your account after onboarding.",
   },
 ];
 
 export default function PricingPage() {
   const [cycle, setCycle] = useState<BillingCycle>("monthly");
-  const [loadError] = useState<string | null>(null);
-  const [isLoading] = useState(false);
+  const [ready] = useState(true);
 
   const cards = useMemo(() => plans, []);
 
-  if (loadError) {
-    return <ErrorState title="Pricing load error" description="Unable to load membership options." />;
+  if (!ready) {
+    return <SkeletonCard rows={4} columns={1} />;
+  }
+
+  if (cards.length === 0) {
+    return (
+      <EmptyState
+        title="Pricing unavailable"
+        description="Please check back shortly for current membership options."
+      />
+    );
   }
 
   return (
     <div className="space-y-8">
-      <SectionCard title="Membership Plans" description="Choose the right plan for your role and goals.">
-        <div className="flex gap-2">
-          {(["monthly", "annual"] as BillingCycle[]).map((c) => (
-            <button
-              key={c}
-              type="button"
-              onClick={() => setCycle(c)}
-              className={`rounded-md px-3 py-1.5 text-sm ${cycle === c ? "bg-[var(--brand-primary)] text-white" : "border border-white/15 text-white/75"}`}
-            >
-              {c.charAt(0).toUpperCase() + c.slice(1)}
-            </button>
-          ))}
+      <SectionCard title="Simple, transparent pricing" description="Choose a plan that matches your goals and role.">
+        <div className="inline-flex rounded-md border border-white/15 bg-black/30 p-1">
+          <button
+            type="button"
+            onClick={() => setCycle("monthly")}
+            className={`rounded px-3 py-1.5 text-sm ${cycle === "monthly" ? "bg-[var(--brand-primary)] text-white" : "text-white/70"}`}
+          >
+            Monthly
+          </button>
+          <button
+            type="button"
+            onClick={() => setCycle("annual")}
+            className={`rounded px-3 py-1.5 text-sm ${cycle === "annual" ? "bg-[var(--brand-primary)] text-white" : "text-white/70"}`}
+          >
+            Annual
+          </button>
         </div>
       </SectionCard>
 
-      {isLoading ? (
-        <div className="grid gap-4 md:grid-cols-3">
-          {[1, 2, 3].map((n) => <SkeletonCard key={n} />)}
-        </div>
-      ) : cards.length === 0 ? (
-        <EmptyState title="No plans available" description="Check back soon for membership options." />
-      ) : (
-        <div className="grid gap-4 md:grid-cols-3">
-          {cards.map((plan) => (
-            <article key={plan.key} className="rounded-xl border border-white/10 bg-[var(--surface)] p-5">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold text-white">{plan.name}</p>
-                <MembershipBadge tier={plan.key} />
-              </div>
-              <p className="mt-3 text-2xl font-bold text-white">
-                {cycle === "monthly" ? plan.monthly : plan.annual}
-                <span className="ml-1 text-xs font-normal text-white/60">/{cycle === "monthly" ? "mo" : "yr"}</span>
-              </p>
-              <p className="mt-2 text-xs text-white/65">{plan.description}</p>
-              <ul className="mt-4 space-y-1">
+      <section className="grid gap-4 md:grid-cols-3">
+        {cards.map((plan) => (
+          <SectionCard
+            key={plan.key}
+            title={plan.name}
+            description={plan.description}
+            footer={
+              <Link
+                href={`/onboarding?plan=${plan.key}&cycle=${cycle}`}
+                className="inline-flex rounded-md bg-[var(--brand-primary)] px-3 py-2 text-sm font-semibold text-white"
+              >
+                Choose {plan.name}
+              </Link>
+            }
+          >
+            <div className="space-y-3">
+              <MembershipBadge tier={plan.key === "player-pro" ? "development" : plan.key === "coach" ? "elite" : "free"} />
+              <p className="text-3xl font-semibold text-white">{cycle === "monthly" ? plan.monthly : plan.annual}</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-white/55">{cycle}</p>
+              <ul className="space-y-2 text-sm text-white/75">
                 {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-center gap-2 text-xs text-white/75">
-                    <span className="text-[var(--brand-primary)]">&#10003;</span> {feature}
-                  </li>
+                  <li key={feature}>• {feature}</li>
                 ))}
               </ul>
-              <Link
-                href="/onboarding"
-                className="mt-4 block rounded-md bg-[var(--brand-primary)] px-3 py-2 text-center text-sm font-semibold text-white"
-              >
-                Get started
-              </Link>
-            </article>
-          ))}
-        </div>
-      )}
+            </div>
+          </SectionCard>
+        ))}
+      </section>
 
       <SectionCard title="Feature comparison" description="Compare what each plan includes.">
         <div className="hidden overflow-x-auto md:block">
@@ -159,7 +171,7 @@ export default function PricingPage() {
               <summary className="cursor-pointer text-sm font-semibold text-white">{plan.name}</summary>
               <ul className="mt-3 space-y-2 text-sm text-white/75">
                 {plan.features.map((feature) => (
-                  <li key={feature}>&bull; {feature}</li>
+                  <li key={feature}>• {feature}</li>
                 ))}
               </ul>
             </details>

@@ -49,38 +49,38 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
       <aside className="space-y-4">
         <SectionCard title="Filters" description="Refine public player discovery.">
           <form className="space-y-3" action="/browse" method="get">
-            <label className="block text-xs text-white/65">Position
-              <select name="position" defaultValue={position} className="w-full rounded-md border border-white/15 bg-black/30 px-3 py-2 text-sm text-white">
-                <option value="">All</option>
-                {positions.map((item) => (
-                  <option key={item} value={item}>{item}</option>
-                ))}
-              </select>
-            </label>
-            <label className="block text-xs text-white/65">Graduation Year
-              <select name="gradYear" defaultValue={gradYear} className="w-full rounded-md border border-white/15 bg-black/30 px-3 py-2 text-sm text-white">
-                <option value="">All</option>
-                {gradYears.map((item) => (
-                  <option key={item} value={item}>{item}</option>
-                ))}
-              </select>
-            </label>
-            <label className="block text-xs text-white/65">State
-              <select name="state" defaultValue={state} className="w-full rounded-md border border-white/15 bg-black/30 px-3 py-2 text-sm text-white">
-                <option value="">All</option>
-                {states.map((item) => (
-                  <option key={item} value={item}>{item}</option>
-                ))}
-              </select>
-            </label>
-            <label className="block text-xs text-white/65">Height Range
-              <select name="heightRange" defaultValue={heightRange} className="w-full rounded-md border border-white/15 bg-black/30 px-3 py-2 text-sm text-white">
-                <option value="">All</option>
-                {heights.map((item) => (
-                  <option key={item.value} value={item.value}>{item.label}</option>
-                ))}
-              </select>
-            </label>
+            <label className="block text-xs text-white/65">Position</label>
+            <select name="position" defaultValue={position} className="w-full rounded-md border border-white/15 bg-black/30 px-3 py-2 text-sm text-white">
+              <option value="">All</option>
+              {positions.map((item) => (
+                <option key={item} value={item}>{item}</option>
+              ))}
+            </select>
+
+            <label className="block text-xs text-white/65">Graduation Year</label>
+            <select name="gradYear" defaultValue={gradYear} className="w-full rounded-md border border-white/15 bg-black/30 px-3 py-2 text-sm text-white">
+              <option value="">All</option>
+              {gradYears.map((item) => (
+                <option key={item} value={item}>{item}</option>
+              ))}
+            </select>
+
+            <label className="block text-xs text-white/65">State</label>
+            <select name="state" defaultValue={state} className="w-full rounded-md border border-white/15 bg-black/30 px-3 py-2 text-sm text-white">
+              <option value="">All</option>
+              {states.map((item) => (
+                <option key={item} value={item}>{item}</option>
+              ))}
+            </select>
+
+            <label className="block text-xs text-white/65">Height Range</label>
+            <select name="heightRange" defaultValue={heightRange} className="w-full rounded-md border border-white/15 bg-black/30 px-3 py-2 text-sm text-white">
+              <option value="">All</option>
+              {heights.map((item) => (
+                <option key={item.value} value={item.value}>{item.label}</option>
+              ))}
+            </select>
+
             <button type="submit" className="w-full rounded-md bg-[var(--brand-primary)] px-3 py-2 text-sm font-semibold text-white">
               Apply Filters
             </button>

@@ -22,22 +22,22 @@ const pillars = [
   {
     title: "Training Hub",
     description: "Structured lessons, drills, clinics, and recruiting education built for long-term development.",
-    icon: "\u{1F3C0}",
+    icon: "🏀",
   },
   {
     title: "Recruiting Visibility",
     description: "Verified athlete profiles designed to increase discoverability and college-readiness.",
-    icon: "\u{1F3AF}",
+    icon: "🎯",
   },
   {
     title: "Trusted Community",
     description: "Parent-aware communication, moderation controls, and role-based accountability.",
-    icon: "\u{1F6E1}\uFE0F",
+    icon: "🛡️",
   },
   {
     title: "Memberships",
     description: "Simple tiered access with clear benefits for players, families, and coaches.",
-    icon: "\u{1F4B3}",
+    icon: "💳",
   },
 ];
 
@@ -62,58 +62,51 @@ const faqPreview = [
   },
 ];
 
-const upcomingEvents = publicEvents.filter((e) => e.period === "upcoming").slice(0, 3);
-
 export default function HomePage() {
+  const upcoming = publicEvents.filter((eventItem) => eventItem.period === "upcoming").slice(0, 3);
+
   return (
-    <div className="space-y-10">
-      <section className="rounded-xl bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-secondary)] p-8 text-center">
-        <h1 className="text-3xl font-bold text-white md:text-4xl">Elite Girls Basketball. Trusted Platform.</h1>
-        <p className="mx-auto mt-3 max-w-xl text-sm text-white/85">
-          ConnectGBB helps athletes build development discipline, gain recruiting visibility, and connect safely with the right programs.
+    <div className="space-y-8">
+      <section className="rounded-xl border border-white/10 bg-[var(--surface)] p-8">
+        <p className="text-xs uppercase tracking-[0.24em] text-white/60">ConnectGBB</p>
+        <h1 className="mt-4 text-3xl font-semibold text-[var(--foreground)] md:text-5xl">
+          The Platform Built for Elite Girls Basketball
+        </h1>
+        <p className="mt-4 max-w-3xl text-sm text-white/75 md:text-base">
+          ConnectGBB brings development, recruiting visibility, and trusted connections into one platform for players, families, and coaches.
         </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-3">
-          <Link href="/onboarding" className="rounded-md bg-white px-5 py-2.5 text-sm font-semibold text-[var(--brand-primary)]">
-            Join ConnectGBB
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Link href="/onboarding" className="rounded-md bg-[var(--brand-primary)] px-4 py-2 text-sm font-semibold text-white">
+            Join as a Player
           </Link>
-          <Link href="/browse" className="rounded-md border border-white/30 px-5 py-2.5 text-sm font-semibold text-white">
-            Browse Athletes
+          <Link href="/onboarding?role=coach" className="rounded-md border border-white/20 px-4 py-2 text-sm font-semibold text-white/85">
+            I&apos;m a Coach
           </Link>
         </div>
       </section>
 
-      <SectionCard title="Who ConnectGBB is for" description="Built for every stakeholder in elite girls basketball.">
-        <div className="grid gap-4 md:grid-cols-3">
-          {valueProps.map((vp) => (
-            <div key={vp.title} className="rounded-md border border-white/10 bg-black/30 p-4">
-              <p className="text-sm font-semibold text-white">{vp.title}</p>
-              <p className="mt-1 text-xs text-white/70">{vp.description}</p>
-            </div>
-          ))}
-        </div>
-      </SectionCard>
+      <section className="grid gap-4 md:grid-cols-3">
+        {valueProps.map((item) => (
+          <SectionCard key={item.title} title={item.title} description={item.description} />
+        ))}
+      </section>
 
-      <SectionCard title="Platform pillars" description="Four connected systems designed for development and trust.">
-        <div className="grid gap-3 sm:grid-cols-2">
-          {pillars.map((p) => (
-            <div key={p.title} className="flex gap-3 rounded-md border border-white/10 bg-black/20 p-4">
-              <span className="text-2xl">{p.icon}</span>
-              <div>
-                <p className="text-sm font-semibold text-white">{p.title}</p>
-                <p className="mt-1 text-xs text-white/65">{p.description}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </SectionCard>
+      <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {pillars.map((pillar) => (
+          <SectionCard
+            key={pillar.title}
+            title={pillar.title}
+            description={pillar.description}
+            footer={<span className="text-lg">{pillar.icon}</span>}
+          />
+        ))}
+      </section>
 
-      <SectionCard title="How it works" description="Three steps to get started.">
-        <ol className="space-y-3">
-          {howItWorks.map((step, i) => (
-            <li key={step} className="flex items-center gap-3 text-sm text-white/80">
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--brand-primary)] text-xs font-bold text-white">
-                {i + 1}
-              </span>
+      <SectionCard title="How it works" description="Three focused steps to accelerate your recruiting journey.">
+        <ol className="grid gap-3 md:grid-cols-3">
+          {howItWorks.map((step, index) => (
+            <li key={step} className="rounded-md border border-white/10 bg-black/30 px-4 py-3 text-sm text-white/80">
+              <span className="mr-2 text-xs text-white/50">{index + 1}.</span>
               {step}
             </li>
           ))}
@@ -122,17 +115,17 @@ export default function HomePage() {
 
       <SectionCard
         title="Upcoming events"
-        description="Clinics, showcases, and education sessions."
-        footer={<Link href="/events" className="text-sm font-semibold text-[var(--brand-secondary)]">See All Events</Link>}
+        description="Clinics, showcases, and recruiting education sessions."
+        footer={<Link href="/events" className="text-sm font-semibold text-[var(--brand-secondary)]">View All Events</Link>}
       >
-        {upcomingEvents.length === 0 ? (
-          <EmptyState title="No upcoming events" description="Check back soon." />
+        {upcoming.length === 0 ? (
+          <EmptyState title="No upcoming events" description="Check back soon for new events." />
         ) : (
           <div className="grid gap-3 md:grid-cols-3">
-            {upcomingEvents.map((eventItem) => (
+            {upcoming.map((eventItem) => (
               <article key={eventItem.id} className="rounded-md border border-white/10 bg-black/30 p-4">
                 <p className="text-sm font-semibold text-white">{eventItem.name}</p>
-                <p className="mt-1 text-xs text-white/65">{eventItem.date} &middot; {eventItem.location}</p>
+                <p className="mt-1 text-xs text-white/65">{eventItem.date} · {eventItem.location}</p>
                 <div className="mt-3">
                   <StatusBadge variant={eventItem.status === "Open" ? "active" : eventItem.status === "Waitlist" ? "pending" : "suspended"} />
                 </div>
