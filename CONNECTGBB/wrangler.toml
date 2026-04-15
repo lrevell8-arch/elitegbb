@@ -26,6 +26,7 @@ NPM_FLAGS = "--legacy-peer-deps"
 
 [env.preview.vars]
 SUPABASE_URL = "https://srrasrbsqajtssqlxoju.supabase.co"
+NPM_FLAGS = "--legacy-peer-deps"
 NEXT_PUBLIC_SUPABASE_URL = "https://srrasrbsqajtssqlxoju.supabase.co"
 NPM_FLAGS = "--legacy-peer-deps"
 
