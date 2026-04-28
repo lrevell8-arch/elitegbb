@@ -1,67 +1,159 @@
 import Link from "next/link";
-import { SectionCard, StatCard } from "@/components/ui";
-
-const teamRoles = ["Player Development Advisors", "College Recruiting Advisors", "Safety & Moderation Team", "Community Partnerships"];
 
 export default function AboutPage() {
   return (
-    <div className="space-y-8">
-      <SectionCard
-        title="About ConnectGBB"
-        description="Our mission is to help elite girls basketball athletes build skills, gain visibility, and connect safely with the right programs."
-      />
-
-      <section className="grid gap-4 md:grid-cols-3">
-        <StatCard label="Focus" value="Girls Basketball" delta="Development + recruiting alignment" />
-        <StatCard label="Approach" value="Trusted Network" delta="Players, families, and coaches" />
-        <StatCard label="Outcome" value="College Ready" delta="Visibility and relationship quality" />
+    <div className="min-h-screen">
+      {/* Hero */}
+      <section className="bg-[var(--surface)] py-20">
+        <div className="max-w-4xl mx-auto text-center px-4">
+          <h1 className="text-4xl md:text-6xl font-bold text-[var(--foreground)] mb-6">
+            Built for the Next Generation of Elite Players
+          </h1>
+          <p className="text-xl text-[var(--foreground)]/80 max-w-2xl mx-auto">
+            ConnectGBB bridges the gap between talented girls basketball players and the college coaches who can help them reach their potential.
+          </p>
+        </div>
       </section>
 
-      <SectionCard title="Brand story" description="ConnectGBB was built to close the gap between talent and opportunity.">
-        <div className="space-y-3 text-sm text-white/75">
-          <p>
-            The platform started from a simple reality: many high-potential girls basketball athletes train hard but lack consistent, credible exposure pathways.
-          </p>
-          <p>
-            Families needed a clearer system for progress tracking, communication safety, and recruiting readiness. Coaches needed reliable profile quality and trustworthy context.
-          </p>
-          <p>
-            ConnectGBB connects these priorities in one membership experience built around development discipline, verified visibility, and responsible connections.
-          </p>
+      {/* Brand Story */}
+      <section className="py-16 bg-[var(--background)]">
+        <div className="max-w-4xl mx-auto px-4">
+          <h2 className="text-3xl font-bold text-[var(--foreground)] mb-8 text-center">Our Story</h2>
+          <div className="space-y-6 text-[var(--foreground)]/80">
+            <p className="text-lg">
+              For too long, girls basketball players have lacked the visibility and connections needed to showcase their talent to college coaches. Traditional recruiting channels favor boys basketball, leaving girls underrepresented and underserved.
+            </p>
+            <p className="text-lg">
+              ConnectGBB was founded by former college coaches and recruiting experts who saw this gap firsthand. We built a platform that gives girls basketball players the tools, training, and connections they deserve.
+            </p>
+            <p className="text-lg">
+              Today, ConnectGBB serves thousands of players, parents, and coaches across the country, creating meaningful connections that lead to college opportunities and lifelong success in basketball.
+            </p>
+          </div>
         </div>
-      </SectionCard>
+      </section>
 
-      <SectionCard title="Why girls basketball" description="The opportunity is growing faster than the infrastructure around it.">
-        <p className="text-sm text-white/75">
-          Girls basketball continues to grow in talent depth, competition quality, and college opportunities. The recruiting process still remains fragmented for many families. ConnectGBB is designed to provide the structure, trust, and clarity needed to support athletes through every stage.
-        </p>
-      </SectionCard>
-
-      <SectionCard title="Trust and safety" description="Player protection and family confidence are non-negotiable.">
-        <ul className="space-y-2 text-sm text-white/75">
-          <li>Role-based access controls for member experiences.</li>
-          <li>Parent-aware communication pathways for minors.</li>
-          <li>Moderation and reporting workflows to enforce community standards.</li>
-          <li>Verified profile and program context for credible interactions.</li>
-        </ul>
-      </SectionCard>
-
-      <SectionCard title="Team and advisory" description="ConnectGBB combines expertise across player development and platform operations.">
-        <div className="grid gap-3 sm:grid-cols-2">
-          {teamRoles.map((role) => (
-            <article key={role} className="rounded-md border border-white/10 bg-black/30 p-4">
-              <p className="text-sm font-semibold text-white">{role}</p>
-            </article>
-          ))}
+      {/* Why Girls Basketball */}
+      <section className="py-16 bg-[var(--surface)]">
+        <div className="max-w-6xl mx-auto px-4">
+          <h2 className="text-3xl font-bold text-[var(--foreground)] mb-12 text-center">
+            The Opportunity in Girls Basketball
+          </h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="text-4xl font-bold text-[var(--brand-primary)] mb-2">15M+</div>
+              <p className="text-[var(--foreground)]/80">Girls playing high school basketball annually</p>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl font-bold text-[var(--brand-primary)] mb-2">2,000+</div>
+              <p className="text-[var(--foreground)]/80">NCAA Division I women's basketball programs</p>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl font-bold text-[var(--brand-primary)] mb-2">$50K+</div>
+              <p className="text-[var(--foreground)]/80">Average athletic scholarship value</p>
+            </div>
+          </div>
         </div>
-      </SectionCard>
+      </section>
 
-      <section className="rounded-xl border border-white/10 bg-[var(--surface)] p-6 text-center">
-        <h2 className="text-xl font-semibold text-white">Join the platform</h2>
-        <p className="mt-2 text-sm text-white/70">Create your profile and start building a trusted recruiting pathway.</p>
-        <Link href="/onboarding" className="mt-4 inline-flex rounded-md bg-[var(--brand-primary)] px-4 py-2 text-sm font-semibold text-white">
-          Start onboarding
-        </Link>
+      {/* Platform Pillars */}
+      <section className="py-16 bg-[var(--background)]">
+        <div className="max-w-6xl mx-auto px-4">
+          <h2 className="text-3xl font-bold text-[var(--foreground)] mb-12 text-center">
+            Everything Players Need to Succeed
+          </h2>
+          <div className="grid md:grid-cols-4 gap-8">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-[var(--brand-primary)] rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">🎥</span>
+              </div>
+              <h3 className="text-xl font-semibold text-[var(--foreground)] mb-2">Training Hub</h3>
+              <p className="text-[var(--foreground)]/80">Professional training videos and drills from college coaches</p>
+            </div>
+            <div className="text-center">
+              <div className="w-16 h-16 bg-[var(--brand-primary)] rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">👁️</span>
+              </div>
+              <h3 className="text-xl font-semibold text-[var(--foreground)] mb-2">Recruiting Visibility</h3>
+              <p className="text-[var(--foreground)]/80">Showcase your talent to verified college coaches</p>
+            </div>
+            <div className="text-center">
+              <div className="w-16 h-16 bg-[var(--brand-primary)] rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">🤝</span>
+              </div>
+              <h3 className="text-xl font-semibold text-[var(--foreground)] mb-2">Trusted Community</h3>
+              <p className="text-[var(--foreground)]/80">Safe connections between players, parents, and coaches</p>
+            </div>
+            <div className="text-center">
+              <div className="w-16 h-16 bg-[var(--brand-primary)] rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">💳</span>
+              </div>
+              <h3 className="text-xl font-semibold text-[var(--foreground)] mb-2">Memberships</h3>
+              <p className="text-[var(--foreground)]/80">Flexible plans for every level of commitment</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Trust and Safety */}
+      <section className="py-16 bg-[var(--surface)]">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold text-[var(--foreground)] mb-8">Your Safety is Our Priority</h2>
+          <div className="space-y-6 text-[var(--foreground)]/80">
+            <p className="text-lg">
+              We understand the concerns parents have about online platforms. That's why ConnectGBB includes comprehensive safety features designed specifically for youth sports recruiting.
+            </p>
+            <p className="text-lg">
+              All coach profiles are verified through rigorous background checks. Parent approval is required for all messaging. Our moderation team monitors all interactions 24/7. And players maintain full control over their profiles and connections.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Team */}
+      <section className="py-16 bg-[var(--background)]">
+        <div className="max-w-6xl mx-auto px-4">
+          <h2 className="text-3xl font-bold text-[var(--foreground)] mb-12 text-center">Our Team</h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="w-24 h-24 bg-[var(--surface-muted)] rounded-full mx-auto mb-4 flex items-center justify-center">
+                <span className="text-2xl">👤</span>
+              </div>
+              <h3 className="text-xl font-semibold text-[var(--foreground)] mb-2">Head of Product</h3>
+              <p className="text-[var(--foreground)]/80">Former Division I coach with 15+ years in youth sports technology</p>
+            </div>
+            <div className="text-center">
+              <div className="w-24 h-24 bg-[var(--surface-muted)] rounded-full mx-auto mb-4 flex items-center justify-center">
+                <span className="text-2xl">👤</span>
+              </div>
+              <h3 className="text-xl font-semibold text-[var(--foreground)] mb-2">Head of Recruiting</h3>
+              <p className="text-[var(--foreground)]/80">Led recruiting for top programs, now helping players get discovered</p>
+            </div>
+            <div className="text-center">
+              <div className="w-24 h-24 bg-[var(--surface-muted)] rounded-full mx-auto mb-4 flex items-center justify-center">
+                <span className="text-2xl">👤</span>
+              </div>
+              <h3 className="text-xl font-semibold text-[var(--foreground)] mb-2">Head of Safety</h3>
+              <p className="text-[var(--foreground)]/80">Child safety expert ensuring every interaction is protected</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="py-16 bg-[var(--brand-primary)]">
+        <div className="max-w-4xl mx-auto text-center px-4">
+          <h2 className="text-3xl font-bold text-white mb-4">Ready to Start Your Journey?</h2>
+          <p className="text-white/90 mb-8 text-lg">
+            Join thousands of players already connecting with their future coaches.
+          </p>
+          <Link
+            href="/onboarding"
+            className="inline-block bg-white text-[var(--brand-primary)] px-8 py-3 rounded-lg font-semibold hover:bg-white/90 transition-colors"
+          >
+            Join ConnectGBB
+          </Link>
+        </div>
       </section>
     </div>
   );

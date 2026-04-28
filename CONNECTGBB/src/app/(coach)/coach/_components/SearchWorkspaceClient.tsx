@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { EmptyState, FilterBar, PaginationControls, ProfileAvatar, SearchBar, VerificationBadge } from "@/components/ui";
 import { useAuth } from "@/components/AuthProvider";
 import type { PublicPlayer } from "@/lib/adapters/players";
@@ -56,7 +57,7 @@ export function SearchWorkspaceClient({ players }: SearchWorkspaceClientProps) {
     verifiedOnly ? { id: "verified", label: "Verified only" } : null,
     hasHighlights ? { id: "highlights", label: "Has highlights" } : null,
     { id: "height", label: `Min height: ${Math.floor(heightMinInches / 12)}'${heightMinInches % 12}"` },
-    { id: "gpa", label: `GPA ${ (gpaMinTenths / 10).toFixed(1)}+` },
+    { id: "gpa", label: `GPA ${(gpaMinTenths / 10).toFixed(1)}+` },
   ].filter((item): item is { id: string; label: string } => Boolean(item));
 
   const toggleFilter = (value: string, selected: string[], setter: (next: string[]) => void) => {
@@ -133,7 +134,44 @@ export function SearchWorkspaceClient({ players }: SearchWorkspaceClientProps) {
               <button onClick={() => setView("list")} className={`rounded-md px-3 py-2 text-sm ${view === "list" ? "bg-[var(--brand-primary)]" : "border border-white/20"}`}>List</button>
             </div>
           </div>
-          <FilterBar filters={activeFilters} onRemove={() => undefined} className="mt-3" />
+          <FilterBar filters={activeFilters} onRemove={(id) => {
+            if (id.startsWith("year-")) {
+              setSelectedYears((prev) => prev.filter((year) => `year-${year}` !== id));
+              return;
+            }
+            if (id.startsWith("position-")) {
+              setSelectedPositions((prev) => prev.filter((position) => `position-${position}` !== id));
+              return;
+            }
+            if (id.startsWith("state-")) {
+              setSelectedStates((prev) => prev.filter((state) => `state-${state}` !== id));
+              return;
+            }
+            if (id === "verified") {
+              setVerifiedOnly(false);
+              return;
+            }
+            if (id === "highlights") {
+              setHasHighlights(false);
+              return;
+            }
+            if (id === "height") {
+              setHeightMinInches(6);
+              return;
+            }
+            if (id === "gpa") {
+              setGpaMinTenths(30);
+              return;
+            }
+          }} onClearAll={() => {
+            setSelectedYears([]);
+            setSelectedPositions([]);
+            setSelectedStates([]);
+            setVerifiedOnly(false);
+            setHasHighlights(false);
+            setHeightMinInches(6);
+            setGpaMinTenths(30);
+          }} className="mt-3" />
         </div>
 
         {paged.length === 0 ? <EmptyState title="No players found" description="Adjust filters to broaden your search." /> : (
@@ -145,10 +183,13 @@ export function SearchWorkspaceClient({ players }: SearchWorkspaceClientProps) {
                   <VerificationBadge state={player.verified ? "verified" : "unverified"} />
                 </div>
                 <p className="mt-2 text-xs text-white/70">{player.state} · {player.height}</p>
-                <div className="mt-3 flex gap-2">
-                  <button onClick={() => onShortlist(player.id)} className="rounded-md bg-[var(--brand-primary)] px-2.5 py-1.5 text-xs font-semibold text-white">{savedIds.includes(player.id) ? "Shortlisted" : "Shortlist"}</button>
-                  <button className="rounded-md border border-white/20 px-2.5 py-1.5 text-xs text-white/80">Save</button>
-                  <button className="rounded-md border border-white/20 px-2.5 py-1.5 text-xs text-white/80">Message</button>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button onClick={() => onShortlist(player.id)} className="rounded-md bg-[var(--brand-primary)] px-2.5 py-1.5 text-xs font-semibold text-white">
+                    {savedIds.includes(player.id) ? "Shortlisted" : "Shortlist"}
+                  </button>
+                  <Link href={`/players/${player.id}`} className="rounded-md border border-white/20 px-2.5 py-1.5 text-xs text-white/80">
+                    View profile
+                  </Link>
                 </div>
               </article>
             ))}

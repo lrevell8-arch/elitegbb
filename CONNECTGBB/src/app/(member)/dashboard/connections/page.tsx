@@ -1,4 +1,3 @@
-import PageLayout from "@/components/PageLayout";
 import { ConnectionsTabsClient } from "@/app/(member)/dashboard/_components/ConnectionsTabsClient";
 
 const requests = [
@@ -16,8 +15,12 @@ const pending = [
 
 export default function DashboardConnectionsPage() {
   return (
-    <PageLayout title="Connections" subtitle="Manage requests, active coach connections, and approvals." eyebrow="Recruiting Network">
-      <ConnectionsTabsClient requests={requests} connected={connected} pending={pending} needsParentApproval={true} underReview={true} />
-    </PageLayout>
+    <ConnectionsTabsClient
+      requests={requests}
+      connected={connected}
+      pending={pending}
+      needsParentApproval={true}
+      underReview={true}
+    />
   );
 }

@@ -1,50 +1,57 @@
-import PageLayout from "@/components/PageLayout";
-import { EmptyState, SectionCard } from "@/components/ui";
-import { getTrainingDashboardData } from "@/lib/adapters/training";
+"use client";
+
 import { TrainingClient } from "@/app/(member)/dashboard/_components/TrainingClient";
+import { getTrainingDashboardData } from "@/lib/adapters/training";
 
-export default async function DashboardTrainingPage() {
-  const data = await getTrainingDashboardData();
+export default function DashboardTrainingPage() {
+  // For now, use mock data until adapter is implemented
+  const mockData = {
+    featuredProgram: {
+      title: "Point Guard Fundamentals",
+      description: "Master the skills every great PG needs",
+      progressPercent: 45,
+    },
+    videos: [
+      {
+        id: "v1",
+        title: "Ball Handling Drills",
+        category: "Ball Handling" as const,
+        difficulty: "intermediate" as const,
+        durationMinutes: 15,
+        progressPercent: 75,
+        completed: false,
+        thumbnailUrl: "/placeholder-video.jpg",
+      },
+      {
+        id: "v2",
+        title: "Court Vision Exercises",
+        category: "Decision Making" as const,
+        difficulty: "advanced" as const,
+        durationMinutes: 20,
+        progressPercent: 100,
+        completed: true,
+        thumbnailUrl: "/placeholder-video.jpg",
+      },
+    ],
+    drills: [
+      {
+        id: "d1",
+        title: "Dribble Knockout",
+        category: "Ball Handling",
+        equipment: "Basketball",
+        durationMinutes: 10,
+        icon: "🏀",
+      },
+      {
+        id: "d2",
+        title: "Pick and Roll Reads",
+        category: "Team Offense",
+        equipment: "Basketball, Cones",
+        durationMinutes: 15,
+        icon: "👥",
+      },
+    ],
+  };
 
-  return (
-    <PageLayout title="Training" subtitle="Explore programs, drills, and continue from where you left off." eyebrow="Training Hub">
-      <SectionCard title={data.featuredProgram.title} description={data.featuredProgram.description}>
-        <div className="space-y-3">
-          <div className="h-2 rounded-full bg-white/10"><div className="h-2 rounded-full bg-[var(--brand-primary)]" style={{ width: `${data.featuredProgram.progressPercent}%` }} /></div>
-          <p className="text-sm text-white/80">{data.featuredProgram.progressPercent}% complete</p>
-          <button type="button" className="rounded-md bg-[var(--brand-primary)] px-3 py-2 text-sm font-semibold text-white">Continue</button>
-        </div>
-      </SectionCard>
-
-      {data.videos.length === 0 ? (
-        <EmptyState title="No training content available" description="Training content will appear when published." />
-      ) : (
-        <TrainingClient data={data} />
-      )}
-
-      <SectionCard title="Drill library" description="Quick-access drills by category and equipment.">
-        {data.drills.length === 0 ? <EmptyState title="No drills available" description="Add drills to build your training library." /> : (
-          <div className="grid gap-3 md:grid-cols-2">
-            {data.drills.map((drill) => (
-              <article key={drill.id} className="rounded-lg border border-white/10 bg-black/30 p-3">
-                <p className="text-sm font-semibold text-white">{drill.icon} {drill.title}</p>
-                <p className="mt-1 text-xs text-white/70">{drill.category} · Equipment: {drill.equipment}</p>
-              </article>
-            ))}
-          </div>
-        )}
-      </SectionCard>
-
-      <SectionCard title="Continue watching" description="Your latest items.">
-        <div className="flex gap-3 overflow-x-auto pb-1">
-          {data.videos.slice(0, 4).map((video) => (
-            <article key={video.id} className="min-w-[220px] rounded-lg border border-white/10 bg-black/30 p-3">
-              <p className="text-sm font-semibold text-white">{video.title}</p>
-              <p className="mt-1 text-xs text-white/70">{video.progressPercent}% complete</p>
-            </article>
-          ))}
-        </div>
-      </SectionCard>
-    </PageLayout>
-  );
+  return <TrainingClient data={mockData} />;
 }

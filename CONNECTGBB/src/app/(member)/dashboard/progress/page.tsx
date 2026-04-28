@@ -1,5 +1,5 @@
-import PageLayout from "@/components/PageLayout";
-import { EmptyState, SectionCard, StatCard } from "@/components/ui";
+import { StatCard } from "@/components/ui/StatCard";
+import { ProgressCard } from "@/components/ui/ProgressCard";
 
 const summary = [
   { label: "Lessons Completed", value: "38", delta: "+4 this week" },
@@ -15,67 +15,70 @@ const milestones = [
   { label: "All-Access", unlocked: false },
 ];
 
-const activity = [
-  "2026-04-14 · Completed Defensive Angles module",
-  "2026-04-13 · Finished 5 Spot Shooting drill",
-  "2026-04-12 · Logged recruiting education lesson",
-];
-
 const goals = [
   { label: "Complete 3 shooting lessons", progress: 67 },
   { label: "Upload one new highlight", progress: 30 },
   { label: "Reach 15-day streak", progress: 80 },
 ];
 
-const keepGoing = ["Closeout Footwork Circuit", "Transition Decision-Making", "Emailing Coaches 101"];
-
 export default function DashboardProgressPage() {
   return (
-    <PageLayout title="Progress" subtitle="Track activity, milestones, and weekly momentum." eyebrow="Performance">
-      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {summary.map((item) => <StatCard key={item.label} label={item.label} value={item.value} delta={item.delta} />)}
-      </section>
+    <div className="space-y-8">
+      {/* Stats Grid */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {summary.map((item) => (
+          <StatCard key={item.label} label={item.label} value={item.value} delta={item.delta} />
+        ))}
+      </div>
 
-      <SectionCard title="Weekly activity" description="Chart-ready data will display as volume grows.">
-        <EmptyState title="Chart coming soon" description="Complete more sessions to enable a richer weekly chart." />
-      </SectionCard>
+      {/* Chart Placeholder */}
+      <div className="bg-[var(--surface)] border border-white/10 rounded-lg p-6">
+        <h2 className="text-xl font-semibold text-[var(--foreground)] mb-4">
+          Weekly Activity Chart
+        </h2>
+        <div className="h-64 bg-[var(--surface-muted)] rounded-lg flex items-center justify-center">
+          <p className="text-[var(--foreground)]/60">Chart visualization coming soon</p>
+        </div>
+      </div>
 
-      <section className="grid gap-4 lg:grid-cols-2">
-        <SectionCard title="Milestones" description="Badge-style achievements with locked and unlocked states.">
-          <div className="grid gap-2 sm:grid-cols-2">
-            {milestones.map((item) => (
-              <div key={item.label} className="rounded-md border border-white/10 bg-black/30 p-3 text-sm text-white/80">
-                {item.unlocked ? "🏅" : "🔒"} {item.label}
+      {/* Milestones */}
+      <div className="bg-[var(--surface)] border border-white/10 rounded-lg p-6">
+        <h2 className="text-xl font-semibold text-[var(--foreground)] mb-4">
+          Milestones
+        </h2>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {milestones.map((item) => (
+            <div key={item.label} className="flex items-center gap-3 p-4 border border-white/10 rounded-lg bg-[var(--surface-muted)]">
+              <div className={`text-2xl ${item.unlocked ? 'text-yellow-400' : 'text-gray-400'}`}>
+                {item.unlocked ? '🏅' : '🔒'}
               </div>
-            ))}
-          </div>
-        </SectionCard>
-
-        <SectionCard title="Recent activity feed" description="Latest completed lessons and drills.">
-          <ul className="space-y-2 text-sm text-white/75">
-            {activity.map((item) => <li key={item}>• {item}</li>)}
-          </ul>
-        </SectionCard>
-      </section>
-
-      <section className="grid gap-4 lg:grid-cols-2">
-        <SectionCard title="Goals" description="Current goals with progress indicators.">
-          <div className="space-y-3">
-            {goals.map((goal) => (
-              <div key={goal.label}>
-                <p className="text-sm text-white/80">{goal.label}</p>
-                <div className="mt-1 h-2 rounded-full bg-white/10"><div className="h-2 rounded-full bg-[var(--brand-primary)]" style={{ width: `${goal.progress}%` }} /></div>
+              <div>
+                <p className="font-medium text-[var(--foreground)]">{item.label}</p>
+                <p className="text-sm text-[var(--foreground)]/60">
+                  {item.unlocked ? 'Unlocked' : 'Locked'}
+                </p>
               </div>
-            ))}
-          </div>
-        </SectionCard>
+            </div>
+          ))}
+        </div>
+      </div>
 
-        <SectionCard title="Keep going" description="Recommended next training items.">
-          <ul className="space-y-2 text-sm text-white/75">
-            {keepGoing.map((item) => <li key={item}>• {item}</li>)}
-          </ul>
-        </SectionCard>
-      </section>
-    </PageLayout>
+      {/* Goals */}
+      <div className="bg-[var(--surface)] border border-white/10 rounded-lg p-6">
+        <h2 className="text-xl font-semibold text-[var(--foreground)] mb-4">
+          Current Goals
+        </h2>
+        <div className="space-y-4">
+          {goals.map((goal) => (
+            <ProgressCard
+              key={goal.label}
+              label={goal.label}
+              value={goal.progress}
+              maxValue={100}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }

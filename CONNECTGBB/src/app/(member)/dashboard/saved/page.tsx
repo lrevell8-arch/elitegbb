@@ -1,4 +1,3 @@
-import PageLayout from "@/components/PageLayout";
 import { SavedTabsClient } from "@/app/(member)/dashboard/_components/SavedTabsClient";
 
 const savedPlayers = [
@@ -17,8 +16,6 @@ const savedEvents = [
 
 export default function DashboardSavedPage() {
   return (
-    <PageLayout title="Saved" subtitle="Review bookmarked players, training content, and events." eyebrow="Bookmarks">
-      <SavedTabsClient players={savedPlayers} training={savedTraining} events={savedEvents} />
-    </PageLayout>
+    <SavedTabsClient players={savedPlayers} training={savedTraining} events={savedEvents} />
   );
 }

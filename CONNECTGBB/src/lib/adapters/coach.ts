@@ -25,8 +25,7 @@ export interface CoachConversation {
 }
 
 export async function getCoachDashboardData(): Promise<CoachDashboardData> {
-  const playersResult = await getPublicPlayers();
-  const players = playersResult.players;
+  const players = await getPublicPlayers();
 
   return {
     verified: false,
