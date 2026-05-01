@@ -118,7 +118,7 @@ export async function onRequestPost(context) {
     const now = new Date().toISOString();
     const { data: updated, error: updateError } = await supabaseQuery(env, 'deliverables', 'PATCH', {
       select: '*',
-      eq: { project_id: projectId, deliverable_type: deliverableType },
+      eq: { project_id: projectId, type: deliverableType },
       body: {
         status: 'complete',
         file_url: fileUrl,
@@ -140,7 +140,7 @@ export async function onRequestPost(context) {
         select: '*',
         body: {
           project_id: projectId,
-          deliverable_type: deliverableType,
+          type: deliverableType,
           status: 'complete',
           file_url: fileUrl,
           created_at: now,

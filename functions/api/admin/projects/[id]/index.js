@@ -118,14 +118,13 @@ export async function onRequestGet(context) {
     });
 
     const normalizedDeliverables = (deliverables || []).map((d) => {
-      const normalizedType = d.deliverable_type || d.type || null;
+      const normalizedType = d.type || null;
       const rawStatus = d.status || 'pending';
       const normalizedStatus = rawStatus === 'delivered' ? 'complete' : rawStatus;
 
       return {
         ...d,
-        deliverable_type: normalizedType,
-        type: d.type || normalizedType,
+        type: normalizedType,
         status: normalizedStatus
       };
     });

@@ -168,7 +168,7 @@ export default function ProjectDetail() {
       setProject(prev => ({
         ...prev,
         deliverables: prev.deliverables.map(d => 
-          d.deliverable_type === deliverableType 
+          d.type === deliverableType 
             ? { ...d, status: 'complete', file_url: response.data.file_url }
             : d
         )
@@ -517,7 +517,7 @@ export default function ProjectDetail() {
                 {deliverables.map(d => (
                   <div 
                     key={d.id}
-                    data-testid={`deliverable-${d.deliverable_type}`}
+                    data-testid={`deliverable-${d.type}`}
                     className="flex items-center justify-between p-3 rounded-lg bg-white/5"
                   >
                     <div className="flex items-center gap-3">
@@ -529,7 +529,7 @@ export default function ProjectDetail() {
                         <Circle className="w-5 h-5 text-white/30" />
                       )}
                       <span className="text-white text-sm">
-                        {DELIVERABLE_TYPES[d.deliverable_type] || d.deliverable_type}
+                        {DELIVERABLE_TYPES[d.type] || d.type}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -547,11 +547,11 @@ export default function ProjectDetail() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => generateDeliverable(d.deliverable_type)}
-                          disabled={generatingDeliverable === d.deliverable_type}
+                          onClick={() => generateDeliverable(d.type)}
+                          disabled={generatingDeliverable === d.type}
                           className="text-xs"
                         >
-                          {generatingDeliverable === d.deliverable_type ? (
+                          {generatingDeliverable === d.type ? (
                             <Loader2 className="w-3 h-3 animate-spin" />
                           ) : (
                             'Generate'
